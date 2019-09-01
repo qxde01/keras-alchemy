@@ -8,3 +8,7 @@ keras alchemy trick
 * [shufflenet](https://github.com/scheckmedia/keras-shufflenet/)
 * [shufflenetv2](https://github.com/opconty/keras-shufflenetV2/)
 * [keras-squeezenet](https://github.com/rcmalli/keras-squeezenet/)
+* [keras-resnet](https://github.com/broadinstitute/keras-resnet)
+* [keras-radam](https://github.com/CyberZHG/keras-radam)
+* [mnist_siamese](https://github.com/keras-team/keras/blob/master/examples/mnist_siamese.py)
+* [pytorch-cifar100](https://github.com/weiaicunzai/pytorch-cifar100)
