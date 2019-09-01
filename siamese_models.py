@@ -56,13 +56,13 @@ def build_model(net='MobileNet',input_shape=(224,224,3),siamese_weights=None,sha
             base_model_b = DenseNet(include_top=False, blocks=[6, 12, 18, 16], input_shape=input_shape, name='b')
     elif net == 'DenseShuffleV1_57_373':
         base_model=DenseShuffleV1(include_top=False,blocks=[6, 8, 12], input_shape=input_shape, num_shuffle_units=[3, 7, 3],
-                             scale_factor=1.0, bottleneck_ratio=1, classes=classes, dropout_rate=0.5)
+                             scale_factor=1.0, bottleneck_ratio=1, dropout_rate=0.5)
     elif net == 'DenseShuffleV2_57_373':
         base_model=DenseShuffleV2(include_top=False,blocks=[6, 8, 12], input_shape=input_shape, num_shuffle_units=[3, 7, 3],
-                             scale_factor=1.0, bottleneck_ratio=1, classes=classes, dropout_rate=0.5)
+                             scale_factor=1.0, bottleneck_ratio=1, dropout_rate=0.5)
     elif net == 'DenseShuffleV2_17_232':
         base_model=DenseShuffleV2(include_top=False,blocks=[2, 2, 2], input_shape=input_shape, num_shuffle_units=[2, 3, 2],
-                             scale_factor=1.0, bottleneck_ratio=1, classes=classes, dropout_rate=0.5)
+                             scale_factor=1.0, bottleneck_ratio=1, dropout_rate=0.5)
     elif net=='ShuffleNetV2':
         base_model=ShuffleNetV2(include_top=False, scale_factor=1.0,pooling='avg',input_shape=input_shape,
                  num_shuffle_units=[3,7,3],bottleneck_ratio=1)
@@ -77,8 +77,8 @@ def build_model(net='MobileNet',input_shape=(224,224,3),siamese_weights=None,sha
         print('the network name you have entered is not supported yet')
         sys.exit()
 
-    input_a = keras.layers.Input(shape=input_shape, name='input_a', dtype=tf.float32)
-    input_b = keras.layers.Input(shape=input_shape, name='input_b', dtype=tf.float32)
+    input_a = keras.layers.Input(shape=input_shape, name='input_a')
+    input_b = keras.layers.Input(shape=input_shape, name='input_b')
     processed_a = base_model(input_a)
 
     if share:

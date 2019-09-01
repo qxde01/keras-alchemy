@@ -123,7 +123,7 @@ if __name__ == '__main__':
         train_gen = DataGenerator_classify(x_train=x_train, y_train=y_train, batch_size=batch_size, size=size, shuffle=True, num_classes=num_classes)
         val_data = (x_test, y_test)
     model.summary()
-    checkpoint=keras.callbacks.ModelCheckpoint(filepath,save_best_only=False,verbose=1,monitor='val_loss')
+    checkpoint=keras.callbacks.ModelCheckpoint(filepath,save_best_only=False,verbose=1,monitor='val_loss',save_weights_only=True)
     callbacks_list=[checkpoint,LRTensorBoard(log_dir='logs')]
     if args.warmup>0:
         warmup_epoch = args.warmup
