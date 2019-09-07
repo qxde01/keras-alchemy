@@ -44,7 +44,7 @@ def __global_depthwise_block(_inputs):
     #assert _inputs._keras_shape[1] == _inputs._keras_shape[2]
     assert _inputs.shape[1] == _inputs.shape[2]
     #kernel_size = _inputs._keras_shape[1]
-    kernel_size = _inputs.shape[1]
+    kernel_size =int( _inputs.shape[1])
     x = keras.layers.DepthwiseConv2D((kernel_size, kernel_size), strides=(1, 1), depth_multiplier=1, padding='valid')(_inputs)
     return x
 
@@ -52,7 +52,7 @@ def __se_block(_inputs, ratio=4, pooling_type='avg'):
     #print('============'*10)
     #print(_inputs,_inputs.shape,_inputs.shape[-1])
     #filters = _inputs._keras_shape[-1]
-    filters = _inputs.shape[-1]
+    filters = int(_inputs.shape[-1])
     se_shape = (1, 1, filters)
     if pooling_type == 'avg':
         se = keras.layers.GlobalAveragePooling2D()(_inputs)
@@ -117,7 +117,7 @@ def build_mobilenet_v3(input_shape=(224,224,3), num_classes=1000, model_type='la
         raise NotImplementedError
 
     # ** shape=(None, channel) --> shape(1, 1, channel) 
-    pooled_shape = (1, 1, net.shape[-1])
+    pooled_shape = (1, 1, int(net.shape[-1]))
 
     net = keras.layers.Reshape(pooled_shape)(net)
     net = keras.layers.Conv2D(1280, (1, 1), strides=(1, 1), padding='valid', use_bias=True)(net)
