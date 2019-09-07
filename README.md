@@ -12,3 +12,4 @@ keras alchemy trick
 * [keras-radam](https://github.com/CyberZHG/keras-radam)
 * [mnist_siamese](https://github.com/keras-team/keras/blob/master/examples/mnist_siamese.py)
 * [pytorch-cifar100](https://github.com/weiaicunzai/pytorch-cifar100)
+* [keras-CLR](https://github.com/bckenstler/CLR)

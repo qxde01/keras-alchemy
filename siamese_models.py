@@ -117,6 +117,6 @@ def covert2cassify(model,num_classes,trainable=False):
         for i in range(0,n):
             base_model.layers[i].trainable=False
     output=keras.layers.Dense(num_classes,activation='softmax',name='softmax')(base_model.layers[-1].output)
-    model=keras.models.Model(base_model.input,output)
+    model=keras.models.Model(base_model.inputs,output)
     return model
 

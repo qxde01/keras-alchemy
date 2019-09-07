@@ -13,7 +13,7 @@ from keras_radam import RAdam
 from siamese_models import build_model,contrastive_loss,covert2cassify
 from siamese_data_generator import DataGenerator,create_pairs,preprocess_input
 from siamese_data_generator import DataGenerator_classify,smooth_labels
-from warmup import LRTensorBoard,WarmUpLearningRateScheduler,CosineAnnealingScheduler
+from warmup import LRTensorBoard,WarmUpLearningRateScheduler,CosineAnnealingScheduler,CyclicLR
 
 global init_lr
 
@@ -138,6 +138,10 @@ if __name__ == '__main__':
         elif args.lr_scheduler == 2:
             print('cosin decay.')
             lrs=CosineAnnealingScheduler(T_max=epochs, eta_max=lr, eta_min=0.0001, verbose=1)
+        elif args.lr_scheduler == 3:
+            lrs = CyclicLR(mode='exp_range',base_lr=lr,max_lr=3*lr, gamma=0.99994)
+        elif args.lr_scheduler == 4:
+            lrs = CyclicLR(mode='exp_range', base_lr=lr, max_lr=3 * lr, gamma=0.99994,scale_mode='cycle')
         else:
             pass
         callbacks_list = callbacks_list+[lrs]
