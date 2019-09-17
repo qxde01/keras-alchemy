@@ -60,6 +60,9 @@ def build_model(net='MobileNet',input_shape=(224,224,3),siamese_weights=None,sha
     elif net == 'DenseShuffleV2_57_373':
         base_model=DenseShuffleV2(include_top=False,blocks=[6, 8, 12], input_shape=input_shape, num_shuffle_units=[3, 7, 3],
                              scale_factor=1.0, bottleneck_ratio=1, dropout_rate=0.5)
+    elif net == 'DenseShuffleV2_49_353':
+        base_model=DenseShuffleV2(include_top=False,blocks=[6, 8, 8], input_shape=input_shape, num_shuffle_units=[3, 5, 3],
+                             scale_factor=1.0, bottleneck_ratio=1, dropout_rate=0.5)
     elif net == 'DenseShuffleV2_17_232':
         base_model=DenseShuffleV2(include_top=False,blocks=[2, 2, 2], input_shape=input_shape, num_shuffle_units=[2, 3, 2],
                              scale_factor=1.0, bottleneck_ratio=1, dropout_rate=0.5)

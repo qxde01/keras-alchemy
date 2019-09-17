@@ -133,7 +133,7 @@ if __name__ == '__main__':
         callbacks_list=callbacks_list+[warm_up_lr]
     if args.lr_scheduler is not None:
         if args.lr_scheduler == 1:
-            print('1/sqrt(1+apha*epoch)')
+            #print('1/sqrt(1+apha*epoch)')
             lrs= keras.callbacks.LearningRateScheduler(scheduler)
         elif args.lr_scheduler == 2:
             print('cosin decay.')
