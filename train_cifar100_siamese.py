@@ -10,9 +10,9 @@ else:
     import tensorflow.keras.backend as K
     os.environ['TF_KERAS'] = '1'
 from keras_radam import RAdam
-from siamese_models import build_model,contrastive_loss,covert2cassify
-from siamese_data_generator import DataGenerator,create_pairs,preprocess_input
-from siamese_data_generator import DataGenerator_classify,smooth_labels
+from siamese import build_model,contrastive_loss,covert2cassify
+from data_generator import DataGenerator,create_pairs,preprocess_input
+from data_generator import DataGenerator_classify,smooth_labels
 from warmup import LRTensorBoard,WarmUpLearningRateScheduler,CosineAnnealingScheduler,CyclicLR
 
 global init_lr
@@ -148,4 +148,4 @@ if __name__ == '__main__':
     #del (x_train, x_test)
 
     model.fit_generator(train_gen, steps_per_epoch=sample_num//batch_size, epochs=epochs, validation_data=val_data,
-                    callbacks=callbacks_list, max_queue_size=20, shuffle=True, use_multiprocessing=False, workers=1)
+                    callbacks=callbacks_list, max_queue_size=30, shuffle=True, use_multiprocessing=False, workers=1)
