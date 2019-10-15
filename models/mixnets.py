@@ -26,6 +26,7 @@ import tensorflow as tf
 if tf.__version__<'2.0':
     import keras
 else:
+    tf.compat.v1.disable_eager_execution()
     from tensorflow import keras
 
 
