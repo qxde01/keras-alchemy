@@ -15,6 +15,8 @@ from classify import build_model
 from data_generator import DataGenerator_classify,smooth_labels,preprocess_input
 from warmup import LRTensorBoard,WarmUpLearningRateScheduler,CosineAnnealingScheduler,CyclicLR
 
+if os.path.exists('saved')==False:
+    os.makedirs('saved')
 global init_lr
 
 #def schler(epoch,init_lr=0.02,apha=0.01):
@@ -31,9 +33,6 @@ def scheduler(epoch):
         lr=0.0005
     print('epoch:',epoch,'lr:',lr)
     return lr
-
-
-
 
 
 def get_args():
