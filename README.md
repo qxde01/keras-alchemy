@@ -1,7 +1,7 @@
 # keras-alchemy
 keras alchemy trick
 
-# Model list( supported net args )
+## Model list(net args)
 ```
 MobileNet
 MobileNetV2
