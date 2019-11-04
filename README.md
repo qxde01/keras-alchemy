@@ -1,9 +1,31 @@
 # keras-alchemy
 keras alchemy trick
 
+# Model list( supported net args )
+```
+MobileNet
+MobileNetV2
+MobileNetV3Small
+MobileNetV3Large
+NASNetMobile
+NASNetLarge
+SqueezeNet
+ShuffleNet
+ShuffleNetV2
+MixNetSmall
+MixNetMedium
+MixNetLarge
+ResNet18
+ResNet18V2
+ResNet34
+ResNet34V2
+DenseNet21
+DenseNet121
+```
+
 # Reference
 * [keras-applications](https://github.com/keras-team/keras-applications)
-* [Keras_Bag_of_Tricks](https://github.com/Tony607/Keras_Bag_of_Tricks)
+* [Keras_ResNet18_of_Tricks](https://github.com/Tony607/Keras_Bag_of_Tricks)
 * [MobileNet_V3](https://github.com/godofpdog/MobileNetV3_keras/)
 * [shufflenet](https://github.com/scheckmedia/keras-shufflenet/)
 * [shufflenetv2](https://github.com/opconty/keras-shufflenetV2/)
