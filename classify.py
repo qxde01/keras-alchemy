@@ -41,6 +41,8 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model = DenseNet(include_top=True,blocks=[6,8,10,8],input_shape=input_shape,classes=classes)
     elif net=='DenseNet109':
         base_model = DenseNet(include_top=True,blocks=[6,12,18,16],input_shape=input_shape,classes=classes)
+    elif net=='DenseNet121':
+        base_model = DenseNet(include_top=True,blocks=[6,12,24,16],input_shape=input_shape,classes=classes)
     elif net == 'DenseShuffleV1_57_373':
         base_model=DenseShuffleV1(include_top=True,blocks=[6, 8, 12], input_shape=input_shape, num_shuffle_units=[3, 7, 3],
                              scale_factor=1.0, bottleneck_ratio=1, dropout_rate=0.5,classes=classes)
