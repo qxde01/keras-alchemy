@@ -5,6 +5,7 @@ if tf.__version__<'2.0':
     import keras
     import keras.backend as K
 else:
+    tf.compat.v1.disable_eager_execution()
     from tensorflow import keras
     import tensorflow.keras.backend as K
 
@@ -13,10 +14,11 @@ from models.mobilenet_v2 import MobileNetV2
 from models.nasnet import NASNetMobile,NASNetLarge
 from models.squeezenet import SqueezeNet
 from models.DenseShuffle import DenseNet,DenseShuffleV1,DenseShuffleV2,ShuffleNetV2
-from models.resnet import ResNet18,ResNet18V2,ResNet34,ResNet34V2
+from models.resnet import ResNet18,ResNet18V2,ResNet34,ResNet34V2,ResNet50,ResNet50V2,ResNeXt50
 from models.mobilenet_v3 import MobileNetV3Small,MobileNetV3Large
 from models.shufflenet import ShuffleNet
 from models.mixnets import MixNetSmall,MixNetLarge,MixNetMedium
+from models.residual_attention_network import AttentionResNet56,AttentionResNet92
 
 def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     if net=='MobileNet' :
@@ -35,6 +37,10 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=ResNet34(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='ResNet34V2':
         base_model=ResNet34V2(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='ResNet50':
+        base_model=ResNet50(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='ResNet50V2':
+        base_model=ResNet50V2(include_top=True,input_shape=input_shape,classes=classes)
     elif net == 'DenseNet21':
         base_model = DenseNet(include_top=True, blocks=[2, 2, 2, 2], input_shape=input_shape,classes=classes,name='a')
     elif net=='DenseNet69':
@@ -55,7 +61,7 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
 
     elif net == 'DenseShuffleV2_17_232':
         base_model=DenseShuffleV2(include_top=True,blocks=[2, 2, 2], input_shape=input_shape, num_shuffle_units=[2, 3, 2],
-                             scale_factor=1.0, bottleneck_ratio=1, dropout_rate=0.5)
+                             scale_factor=1.0, bottleneck_ratio=1, dropout_rate=0.5,classes=classes)
     elif net == 'DenseShuffleV1_17_232':
         base_model=DenseShuffleV1(include_top=True,blocks=[2, 2, 2], input_shape=input_shape, num_shuffle_units=[2, 3, 2],
                              scale_factor=1.0, bottleneck_ratio=1, dropout_rate=0.5,classes=classes)
@@ -78,6 +84,10 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=MixNetSmall(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='MixNetLarge':
         base_model=MixNetLarge(include_top=True,input_shape=input_shape,classes=classes)
+    elif net == 'AttentionResNet56':
+        base_model = AttentionResNet56(include_top=True, input_shape=input_shape,n_channels=32,n_classes=classes)
+    elif net == 'AttentionResNet92':
+        base_model = AttentionResNet92(include_top=True, input_shape=input_shape,n_channels=32,n_classes=classes)
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()
