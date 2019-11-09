@@ -21,6 +21,7 @@ ResNet34
 ResNet34V2
 ResNet50
 ResNet50V2
+ResNeXt50
 DenseNet21
 DenseNet121
 AttentionResNet56
