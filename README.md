@@ -19,8 +19,12 @@ ResNet18
 ResNet18V2
 ResNet34
 ResNet34V2
+ResNet50
+ResNet50V2
 DenseNet21
 DenseNet121
+AttentionResNet56
+AttentionResNet92
 ```
 
 # Reference
@@ -36,3 +40,4 @@ DenseNet121
 * [pytorch-cifar100](https://github.com/weiaicunzai/pytorch-cifar100)
 * [keras-CLR](https://github.com/bckenstler/CLR)
 * [keras_mixnets](https://github.com/titu1994/keras_mixnets)
+* [residual_attention_network](https://github.com/qubvel/residual_attention_network)
