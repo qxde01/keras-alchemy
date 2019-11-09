@@ -108,7 +108,7 @@ def attention_block(input, input_channels=None, output_channels=None, encoder_de
     return output
 
 def AttentionResNet92(include_top=True,input_shape=(224, 224, 3), n_channels=64, n_classes=100,
-                      dropout=0, regularization=0.01):
+                      dropout=0, regularization=0.0001):
     """
     Attention-92 ResNet
     https://arxiv.org/abs/1704.06904
@@ -137,7 +137,7 @@ def AttentionResNet92(include_top=True,input_shape=(224, 224, 3), n_channels=64,
     x = residual_block(x, output_channels=n_channels * 32)
     x = residual_block(x, output_channels=n_channels * 32)
 
-    pool_size = (x.get_shape()[1].value, x.get_shape()[2].value)
+    pool_size = (x._shape_tuple()[1], x._shape_tuple()[2])
     x = keras.layers.AveragePooling2D(pool_size=pool_size, strides=(1, 1))(x)
     x = keras.layers.Flatten()(x)
     if dropout:
@@ -151,7 +151,7 @@ def AttentionResNet92(include_top=True,input_shape=(224, 224, 3), n_channels=64,
 
 
 def AttentionResNet56(include_top=True,input_shape=(224, 224, 3), n_channels=64, n_classes=100,
-                      dropout=0, regularization=0.01):
+                      dropout=0, regularization=0.0001):
     """
     Attention-56 ResNet
     https://arxiv.org/abs/1704.06904
