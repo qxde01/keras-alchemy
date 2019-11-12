@@ -7,3 +7,4 @@ from .squeezenet import SqueezeNet
 from .nasnet import NASNetMobile,NASNetLarge
 from .mixnets import MixNetMedium,MixNetLarge,MixNetSmall
 from .residual_attention_network import AttentionResNet56,AttentionResNet92
+from .DualPathNetwork import  DPN92,DPN98,DPN107,DPN137
