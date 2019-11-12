@@ -26,6 +26,10 @@ DenseNet21
 DenseNet121
 AttentionResNet56
 AttentionResNet92
+DPN92
+DPN98
+DPN107
+DPN137
 ```
 
 # Reference
@@ -42,3 +46,4 @@ AttentionResNet92
 * [keras-CLR](https://github.com/bckenstler/CLR)
 * [keras_mixnets](https://github.com/titu1994/keras_mixnets)
 * [residual_attention_network](https://github.com/qubvel/residual_attention_network)
+* [Keras-DualPathNetworks](https://github.com/titu1994/Keras-DualPathNetworks)
