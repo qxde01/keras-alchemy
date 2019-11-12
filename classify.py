@@ -19,6 +19,7 @@ from models.mobilenet_v3 import MobileNetV3Small,MobileNetV3Large
 from models.shufflenet import ShuffleNet
 from models.mixnets import MixNetSmall,MixNetLarge,MixNetMedium
 from models.residual_attention_network import AttentionResNet56,AttentionResNet92
+from models.DualPathNetwork import  DPN92,DPN98,DPN107,DPN137
 
 def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     if net=='MobileNet' :
@@ -88,6 +89,14 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model = AttentionResNet56(include_top=True, input_shape=input_shape,n_channels=32,n_classes=classes)
     elif net == 'AttentionResNet92':
         base_model = AttentionResNet92(include_top=True, input_shape=input_shape,n_channels=32,n_classes=classes)
+    elif net=='DPN92':
+        base_model=DPN92(include_top=True,input_shape=input_shape,classes=classes)    
+    elif net=='DPN98':
+        base_model=DPN98(include_top=True,input_shape=input_shape,classes=classes)    base_model=DPN98(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='DPN107':
+        base_model=DPN107(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='DPN137':
+        base_model=DPN137(include_top=True,input_shape=input_shape,classes=classes)
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()
