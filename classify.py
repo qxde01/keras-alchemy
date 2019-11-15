@@ -74,9 +74,9 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model = ShuffleNet(include_top=True, scale_factor=1.0, pooling='avg', input_shape=input_shape,
                                   num_shuffle_units=[3, 7, 3], bottleneck_ratio=1,classes=classes)
     elif net=='MobileNetV3Small':
-        base_model = MobileNetV3Small(include_top=True,input_shape=input_shape,classes=classes)
+        base_model = MobileNetV3Small(include_top=True,input_shape=input_shape,num_classes=classes)
     elif net=='MobileNetV3Large':
-        base_model = MobileNetV3Large(include_top=True,input_shape=input_shape,classes=classes)
+        base_model = MobileNetV3Large(include_top=True,input_shape=input_shape,num_classes=classes)
     elif net=='SqueezeNet':
         base_model = SqueezeNet(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='MixNetMedium':
