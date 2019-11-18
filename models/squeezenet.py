@@ -29,7 +29,7 @@ def SqueezeNet(include_top=True,input_shape=(224,224,3), pooling='avg',classes=1
     """Instantiates the SqueezeNet architecture.
     """
     img_input = keras.layers.Input(shape=input_shape)
-    x = keras.layers.Conv2D(64, (3, 3), strides=(2, 2), padding='valid',  use_bias=False,kernel_initializer='he_normal',name='conv1')(img_input) #111, 111, 64
+    x = keras.layers.Conv2D(64, (7, 7), strides=(2, 2), padding='same',  use_bias=False,kernel_initializer='he_normal',name='conv1')(img_input) #112, 112, 64
     x = keras.layers.Activation('relu', name='relu_conv1')(x)
     x = keras.layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), name='pool1')(x) #55, 55, 64
 
