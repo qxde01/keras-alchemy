@@ -92,7 +92,7 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     elif net=='DPN92':
         base_model=DPN92(include_top=True,input_shape=input_shape,classes=classes)    
     elif net=='DPN98':
-        base_model=DPN98(include_top=True,input_shape=input_shape,classes=classes)    base_model=DPN98(include_top=True,input_shape=input_shape,classes=classes)
+        base_model=DPN98(include_top=True,input_shape=input_shape,classes=classes)    
     elif net=='DPN107':
         base_model=DPN107(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='DPN137':
