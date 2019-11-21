@@ -109,6 +109,10 @@ if __name__ == '__main__':
             print('triangular2 cycle decay.')
             lrs = CyclicLR(mode='triangular2', base_lr=lr, max_lr=max_lr, gamma=0.99994,scale_mode='cycle')
             callbacks_list = callbacks_list + [lrs]
+        elif args.lr_scheduler ==6:
+            lrs = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.6, patience=6, verbose=1, mode='min',
+                                         min_delta=0.0001, cooldown=0, min_lr=0.00005)
+            callbacks_list = callbacks_list + [lrs]
         else:
             pass
 
