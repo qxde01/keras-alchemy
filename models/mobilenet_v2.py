@@ -122,7 +122,7 @@ def _make_divisible(v, divisor, min_value=None):
     return new_v
 
 #[96, 128, 160, 192, 224]
-def MobileNetV2(include_top=True,input_shape=(224, 224, 3), alpha=1.0,pooling='avg',classes=1000):
+def MobileNetV2(include_top=True,input_shape=(224, 224, 3), alpha=1.0,pooling=None,classes=1000):
     """Instantiates the MobileNetV2 architecture.
 
     # Arguments
@@ -224,6 +224,8 @@ def MobileNetV2(include_top=True,input_shape=(224, 224, 3), alpha=1.0,pooling='a
         x = keras.layers.GlobalAveragePooling2D()(x)
     elif pooling == 'max':
         x = keras.layers.GlobalMaxPooling2D()(x)
+    else:
+        x=keras.layers.Flatten()(x)
     if include_top:
         x = keras.layers.Dense(classes, activation='softmax', use_bias=True, name='Logits')(x)
     # Create model.
