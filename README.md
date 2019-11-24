@@ -1,5 +1,5 @@
 # keras-alchemy
-keras alchemy trick
+keras alchemy of image classification
 
 ## Model list(net args)
 ```
@@ -30,6 +30,8 @@ DPN92
 DPN98
 DPN107
 DPN137
+DarkNet53
+MnasNet
 ```
 
 # Reference
@@ -47,3 +49,5 @@ DPN137
 * [keras_mixnets](https://github.com/titu1994/keras_mixnets)
 * [residual_attention_network](https://github.com/qubvel/residual_attention_network)
 * [Keras-DualPathNetworks](https://github.com/titu1994/Keras-DualPathNetworks)
+* [DarkNet53](https://github.com/xiaochus/YOLOv3)
+* [MnasNet](https://github.com/Shathe/MNasNet-Keras-Tensorflow)
