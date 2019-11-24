@@ -20,6 +20,8 @@ from models.shufflenet import ShuffleNet
 from models.mixnets import MixNetSmall,MixNetLarge,MixNetMedium
 from models.residual_attention_network import AttentionResNet56,AttentionResNet92
 from models.DualPathNetwork import  DPN92,DPN98,DPN107,DPN137
+from models.darknet53 import darknet
+from models.Mnasnet import MnasNet
 
 def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     if net=='MobileNet' :
@@ -97,6 +99,10 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=DPN107(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='DPN137':
         base_model=DPN137(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='DarkNet53':
+        base_model=darknet(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='MnasNet':
+        base_model=MnasNet(include_top=True,input_shape=input_shape,classes=classes)
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()
