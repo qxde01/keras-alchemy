@@ -4,10 +4,10 @@ import tensorflow as tf
 import argparse,os
 if tf.__version__<'2.0':
     import keras
-    from keras import backend as K
+    filepath='{val_loss: .4f} - {val_acc: .4f} - {epoch: 03d}.h5'
 else:
     from tensorflow import keras
-    import tensorflow.keras.backend as K
+    filepath='{val_loss: .4f} - {val_accuracy: .4f} - {epoch: 03d}.h5'
     os.environ['TF_KERAS'] = '1'
 from keras_radam import RAdam
 from keras_lookahead import Lookahead
@@ -38,13 +38,14 @@ def scheduler(epoch):
 def get_args():
     parser = argparse.ArgumentParser(description="cifar100 train.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--net", "-net",type=str,  help=" net type",default='MobileNetV2')
-    parser.add_argument("--batch_size","-batch_size", type=int, default=128, help="batch size")
+    parser.add_argument("--batch_size","-batch_size", type=int, default=32, help="batch size")
     parser.add_argument("--epochs","-epochs", type=int, default=500, help="number of epochs")
     parser.add_argument('--pretrained',"-p",type=str,default=None,help=' softmax model weights  h5 file')
     parser.add_argument("--learning_rate",'-lr', type=float,default=0.01, help="learning_rate")
-    parser.add_argument("--max_lr", '-max_lr', type=float, default=0.01, help="max learning_rate")
-    parser.add_argument("--warmup", '-wp', type=int, default=1, help="warmup ")
+    parser.add_argument("--min_lr", '-min_lr', type=float, default=0.0005, help="min learning_rate")
+    parser.add_argument("--warmup", '-wp', type=int, default=0, help="warmup ")
     parser.add_argument("--lr_scheduler",'-lrs', type=int,default=None,help="1-stage decay,2-CosineAnnealingScheduler")
+    parser.add_argument("--optimizers", '-optimizers', type=str, default='sgd', help="optimizers:SGD,Adam,Radam")
     args = parser.parse_args()
     return args
 
@@ -55,7 +56,7 @@ if __name__ == '__main__':
     net = args.net
     lr=args.learning_rate
     init_lr=lr
-    max_lr=args.max_lr
+    min_lr=args.min_lr
     epochs = args.epochs
     batch_size = args.batch_size
     #size=32
@@ -66,8 +67,12 @@ if __name__ == '__main__':
     input_shape = x_train.shape[1:]
     classes = len(np.unique(y_train))
     #opt =Lookahead( RAdam(lr=lr, weight_decay=0.00005, decay=0.0, min_lr=0.00001),sync_period=5,slow_step=0.5)
-    opt=RAdam(lr=lr, weight_decay=0.00005, decay=0.0, min_lr=0.00001)
-    #opt=keras.optimizers.SGD(lr=lr,momentum=0.9,nesterov=True)
+    if args.optimizers.lower()=='sgd':
+        opt=keras.optimizers.SGD(lr=lr,momentum=0.9,nesterov=True)
+    elif args.optimizers.lower()=='adam':
+        opt=keras.optimizers.Adam(lr=lr,amsgrad=True)
+    else:
+        opt = RAdam(lr=lr, weight_decay=0.00005, decay=0.0, min_lr=0.00001)
     print('build model:',net)
     model = build_model(net=net, input_shape=input_shape, classes=classes)
     if args.pretrained is not None:
@@ -79,14 +84,15 @@ if __name__ == '__main__':
     train_gen = DataGenerator_classify(x_train=x_train, y_train=y_train, batch_size=batch_size, size=32, shuffle=True, num_classes=classes)
     val_data = (x_test, y_test)
     model.summary()
-    filepath = 'saved/classify_%s_{val_loss:.4f}-{val_acc:.4f}-{epoch:03d}.h5' % net
+    #filepath = 'saved/classify_%s_{val_loss:.4f}-{val_acc:.4f}-{epoch:03d}.h5' % net
+    filepath = 'saved/classify_%s_%s' % (net,filepath)
     checkpoint=keras.callbacks.ModelCheckpoint(filepath,save_best_only=False,verbose=1,monitor='val_loss',save_weights_only=True)
     callbacks_list=[checkpoint,LRTensorBoard(log_dir='logs')]
     if args.warmup>0:
         warmup_epoch = args.warmup
         warmup_batches = warmup_epoch * sample_num // batch_size+1
         print('warmup_batches:',warmup_batches)
-        warm_up_lr = WarmUpLearningRateScheduler(init_lr=max_lr, warmup_batches=warmup_batches)
+        warm_up_lr = WarmUpLearningRateScheduler(init_lr=lr, warmup_batches=warmup_batches)
         callbacks_list=callbacks_list+[warm_up_lr]
     if args.lr_scheduler is not None:
         if args.lr_scheduler == 1:
@@ -95,23 +101,23 @@ if __name__ == '__main__':
             callbacks_list = callbacks_list + [lrs]
         elif args.lr_scheduler == 2:
             print('cosin decay.')
-            lrs=CosineAnnealingScheduler(T_max=epochs, eta_max=max_lr, eta_min=0.0001, verbose=1)
+            lrs=CosineAnnealingScheduler(T_max=epochs, eta_max=lr, eta_min=min_lr, verbose=1)
             callbacks_list = callbacks_list + [lrs]
         elif args.lr_scheduler == 3:
             print('exp_range decay.')
-            lrs = CyclicLR(mode='exp_range',base_lr=lr,max_lr=max_lr, gamma=0.99994)
+            lrs = CyclicLR(mode='exp_range',base_lr=min_lr,max_lr=lr, gamma=0.99994)
             callbacks_list = callbacks_list + [lrs]
         elif args.lr_scheduler == 4:
             print('exp_range cycle decay.')
-            lrs = CyclicLR(mode='exp_range', base_lr=lr, max_lr=max_lr, gamma=0.99994,scale_mode='cycle')
+            lrs = CyclicLR(mode='exp_range', base_lr=min_lr, max_lr=lr, gamma=0.99994,scale_mode='cycle')
             callbacks_list = callbacks_list + [lrs]
         elif args.lr_scheduler == 5:
             print('triangular2 cycle decay.')
-            lrs = CyclicLR(mode='triangular2', base_lr=lr, max_lr=max_lr, gamma=0.99994,scale_mode='cycle')
+            lrs = CyclicLR(mode='triangular2', base_lr=min_lr, max_lr=lr, gamma=0.99994,scale_mode='cycle')
             callbacks_list = callbacks_list + [lrs]
         elif args.lr_scheduler ==6:
-            lrs = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.6, patience=6, verbose=1, mode='min',
-                                         min_delta=0.0001, cooldown=0, min_lr=0.00005)
+            lrs = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.8, patience=8, verbose=1, mode='min',
+                                         min_delta=0.0001, cooldown=0, min_lr=min_lr)
             callbacks_list = callbacks_list + [lrs]
         else:
             pass
