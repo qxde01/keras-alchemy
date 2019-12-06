@@ -48,32 +48,36 @@ def random_crop(image, crop_shape, padding=None):
 
 
 def AugImage(image, size=224):
-    kidx = np.random.randint(0, 9, 1)[0]
+    #kidx = np.random.randint(0, 100, 1)[0]/100.
+    kidx=np.random.random_sample(1)[0]
     h, w = image.shape[:2]
     #print('   >>>>',kidx)
-    if kidx == 0 or kidx==1:
-        padding =  int(h* np.random.randint(40, 125,1)/1000.)
+    if kidx <=0.15:
+        padding =  int(h* np.random.randint(50, 125,1)/1000.)
         crop_shape = (h - padding, w - padding)
         image = random_crop(image, crop_shape=crop_shape, padding=padding)
         image = cv2.resize(image, (size, size))
-    elif kidx == 2:
-        image = skimage.util.random_noise(image, mode='gaussian',mean=0,var=0.001)
-        image= np.array(image*255,dtype=np.uint8)
-    elif kidx == 3:
-        sigma = np.random.randint(1, 9, 1)[0]
-        if sigma % 2 == 0:
-            sigma = sigma + 1
-        image = cv2.GaussianBlur(image, ksize=(sigma, sigma), sigmaX=0, sigmaY=0)
-    elif kidx == 4:
+        #if np.random.randint(1,100,1)[0]/100.>0.5:
+        #    center = cv2.getRotationMatrix2D((w / 2, h / 2), np.random.randint(30, 180, 1), 1)
+        #    image = cv2.warpAffine(image, center, (w, h))
+    # elif kidx <=0.47 and kidx>0.4 :
+    #     image = skimage.util.random_noise(image, mode='gaussian',mean=0,var=0.001)
+    #     image= np.array(image*255,dtype=np.uint8)
+    # elif kidx <=0.54 and kidx>0.47 :
+    #     sigma = np.random.randint(1, 9, 1)[0]
+    #     if sigma % 2 == 0:
+    #         sigma = sigma + 1
+    #     image = cv2.GaussianBlur(image, ksize=(sigma, sigma), sigmaX=0, sigmaY=0)
+    elif kidx <=0.3 and kidx>0.15 :
         image = np.fliplr(image)
-    elif kidx == 5:
-        center = cv2.getRotationMatrix2D((w / 2, h / 2), np.random.randint(5, 90, 1), 1)
+    elif kidx <=0.45 and kidx>0.3 :
+        center = cv2.getRotationMatrix2D((w / 2, h / 2), np.random.randint(30, 180, 1), 1)
         image = cv2.warpAffine(image, center, (w, h))
-    elif kidx==6:
+    elif kidx <=0.6 and kidx>0.45 :
         image=Shparpen(image)
-    elif kidx==7:
+    elif kidx <=0.75 and kidx>0.6 :
         image=Excessive(image)
-    elif kidx==8:
+    elif kidx <=0.9 and kidx>0.75 :
         image=EdgeEnhance(image)
     else:
         image = image
@@ -85,6 +89,20 @@ def preprocess_input(x):
         x = x.astype(np.float32)
     x /= 127.5
     x -= 1.
+    return x
+
+def preprocess_input_torch(x):
+    mean=[0.5070751592371322,0.4865488733149497,0.44091784336703466]
+    std=[0.26733428587924063,0.25643846291708833,0.27615047132568393]
+    if x.dtype not in ['float32', 'float64', 'float']:
+        x = x.astype(np.float32)
+    x /= 255.0
+    x[..., 0] -= mean[0]
+    x[..., 1] -= mean[1]
+    x[..., 2] -= mean[2]
+    x[..., 0] /= std[0]
+    x[..., 1] /= std[1]
+    x[..., 2] /= std[2]
     return x
 
 def create_pairs(x, digit_indices,num_classes):
