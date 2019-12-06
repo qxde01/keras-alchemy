@@ -4,10 +4,10 @@ import tensorflow as tf
 import argparse,os
 if tf.__version__<'2.0':
     import keras
-    filepath='{val_loss: .4f} - {val_acc: .4f} - {epoch: 03d}.h5'
+    filepath='{val_loss:.4f}-{val_acc:.4f}-{epoch:03d}.h5'
 else:
     from tensorflow import keras
-    filepath='{val_loss: .4f} - {val_accuracy: .4f} - {epoch: 03d}.h5'
+    filepath='{val_loss:.4f}-{val_accuracy:.4f}-{epoch:03d}.h5'
     os.environ['TF_KERAS'] = '1'
 from keras_radam import RAdam
 from keras_lookahead import Lookahead
