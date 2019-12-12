@@ -32,6 +32,8 @@ DPN107
 DPN137
 DarkNet53
 MnasNet
+SimpleNetV1
+SimpleNetV2
 ```
 
 # Reference
@@ -51,3 +53,4 @@ MnasNet
 * [Keras-DualPathNetworks](https://github.com/titu1994/Keras-DualPathNetworks)
 * [DarkNet53](https://github.com/xiaochus/YOLOv3)
 * [MnasNet](https://github.com/Shathe/MNasNet-Keras-Tensorflow)
+* [SimpleNet](https://github.com/Coderx7/SimpleNet)
