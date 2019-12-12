@@ -22,6 +22,7 @@ from models.residual_attention_network import AttentionResNet56,AttentionResNet9
 from models.DualPathNetwork import  DPN92,DPN98,DPN107,DPN137
 from models.darknet53 import darknet
 from models.Mnasnet import MnasNet
+from models.SimpleNet import SimpleNetV1,SimpleNetV2
 
 def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     if net=='MobileNet' :
@@ -107,9 +108,33 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=DPN137(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='DarkNet53':
         base_model=darknet(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='SimpleNetV1':
+        base_model=SimpleNetV1(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='SimpleNetV2':
+        base_model=SimpleNetV2(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='MnasNet':
         base_model=MnasNet(include_top=True,input_shape=input_shape,classes=classes)
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()
     return base_model
+
+def RandSqeenzeLayer(model,alpha=0.5):
+    layers_list=model.layers
+    layers_list=[str(a).split(' ')[0] for a in layers_list]
+    layers_list = [a.split('.')[-1] for a in layers_list]
+    sq=['Conv2D','DepthwiseConv2D','Dense']
+    layers_index=[]
+    n=len(layers_list)
+    for i in range(0,n-1):
+        if sq.__contains__(layers_list[i]):
+            layers_index.append(i)
+    #layers_index=[layers_list.index(a) for a in layers_list if ['Conv2D','DepthwiseConv2D','Dense'].__contains__(a)]
+    num_layers=len(layers_index)
+    #sn=np.random.randint(1,num_layers,int(num_layers*alpha))
+    sn=np.random.choice(a=layers_index, size=int(num_layers*alpha), replace=False, p=None)
+    sn.sort()
+    for i in sn:
+        print(i,model.get_layer(index=i))
+        model.layers[i].trainable=False
+    return model
