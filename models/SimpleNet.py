@@ -157,7 +157,7 @@ def SimpleNetV2(include_top=True,input_shape=(224,224,3),pooling='max',classes=1
     conv8 = keras.layers.Conv2D(192, kernel_size=3, strides=(1, 1), padding='same', name='conv8',
                                 kernel_initializer='he_normal')(conv7)
     conv8 = keras.layers.BatchNormalization(axis=-1, momentum=0.95, epsilon=1e-5, name='conv8_bn')(conv8)
-    conv8 = keras.layers.ReLU(name='conv8_bn_relu')(conv6)
+    conv8 = keras.layers.ReLU(name='conv8_bn_relu')(conv8)
     #conv8 = keras.layers.Dropout(rate=dropout_rate, name='dropout9')(conv8)
 
     conv9 = keras.layers.Conv2D(192, kernel_size=3, strides=(1, 1), padding='same', name='conv9',
