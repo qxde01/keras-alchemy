@@ -35,6 +35,13 @@ MnasNet
 SimpleNetV1
 SimpleNetV2
 ```
+## cifar100 Results
+
+|network|params|val_acc|
+|:---:|:---:|:---:|
+|SimpleNetV1|18,113,508|0.7295|
+|SimpleNetV2|5,522,739|0.7305|
+|SqueezeNet|787,108|0.7068|
 
 # Reference
 * [keras-applications](https://github.com/keras-team/keras-applications)
