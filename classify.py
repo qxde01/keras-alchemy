@@ -23,6 +23,7 @@ from models.DualPathNetwork import  DPN92,DPN98,DPN107,DPN137
 from models.darknet53 import darknet
 from models.Mnasnet import MnasNet
 from models.SimpleNet import SimpleNetV1,SimpleNetV2
+from models.vgg import VGG11Small,VGG11,VGG13,VGG16,VGG19
 
 def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     if net=='MobileNet' :
@@ -114,6 +115,16 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=SimpleNetV2(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='MnasNet':
         base_model=MnasNet(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='VGG11Small':
+        base_model=VGG11Small(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='VGG11':
+        base_model=VGG11(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='VGG13':
+        base_model=VGG13(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='VGG16':
+        base_model=VGG16(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='VGG19':
+        base_model=VGG19(include_top=True,input_shape=input_shape,classes=classes)   
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()
