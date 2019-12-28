@@ -32,9 +32,9 @@ def transition_block(x, reduction, name):
         output tensor for the block.
     """
     bn_axis = 3 if keras.backend.image_data_format() == 'channels_last' else 1
-    x = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5,name=name + '_bn')(x)
+    x = keras.layers.BatchNormalization(axis=bn_axis, momentum=0.9, epsilon=1.001e-5,name=name + '_bn')(x)
     x = keras.layers.Activation('relu', name=name + '_relu')(x)
-    x = keras.layers.Conv2D(int(keras.backend.int_shape(x)[bn_axis] * reduction), 1,  use_bias=False, kernel_initializer='he_normal',  name=name + '_conv')(x)
+    x = keras.layers.Conv2D(int(keras.backend.int_shape(x)[bn_axis] * reduction), 1,  use_bias=False, kernel_initializer='Orthogonal',  name=name + '_conv')(x)
     x = keras.layers.AveragePooling2D(2, strides=2, name=name + '_pool')(x)
     return x
 
@@ -49,14 +49,14 @@ def conv_block(x, growth_rate, name,do_norm=True):
     """
     bn_axis = 3 if keras.backend.image_data_format() == 'channels_last' else 1
     if do_norm == True:
-        x1 = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name + '_0_bn')(x)
+        x1 = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5, name=name + '_0_bn')(x)
         x1 = keras.layers.Activation('relu', name=name + '_0_relu')(x1)
     else:
         x1=x
-    x1 = keras.layers.Conv2D(4 * growth_rate, 1,  use_bias=False,kernel_initializer='he_normal',   name=name + '_1_conv')(x1)
-    x1 = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5,  name=name + '_1_bn')(x1)
+    x1 = keras.layers.Conv2D(4 * growth_rate, 1,  use_bias=False,kernel_initializer='Orthogonal',   name=name + '_1_conv')(x1)
+    x1 = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5,  name=name + '_1_bn')(x1)
     x1 = keras.layers.Activation('relu', name=name + '_1_relu')(x1)
-    x1 = keras.layers.Conv2D(growth_rate, 3,  padding='same', use_bias=False, kernel_initializer='he_normal',   name=name + '_2_conv')(x1)
+    x1 = keras.layers.Conv2D(growth_rate, 3,  padding='same', use_bias=False, kernel_initializer='Orthogonal',   name=name + '_2_conv')(x1)
     x = keras.layers.Concatenate(axis=bn_axis, name=name + '_concat')([x, x1])
     return x
 
@@ -89,20 +89,20 @@ def shuffle_unit(inputs, out_channels, bottleneck_ratio,strides=2,stage=1,block=
         c_hat, c = channel_split(inputs, '{}/spl'.format(prefix))
         inputs = c
     x = keras.layers.Conv2D(bottleneck_channels, kernel_size=(1,1), strides=1, padding='same',kernel_initializer='he_normal',  name='{}/1x1conv_1'.format(prefix))(inputs)
-    x =  keras.layers.BatchNormalization(axis=bn_axis, name='{}/bn_1x1conv_1'.format(prefix))(x)
+    x =  keras.layers.BatchNormalization(axis=bn_axis,momentum=0.05, name='{}/bn_1x1conv_1'.format(prefix))(x)
     x =  keras.layers.Activation('relu', name='{}/relu_1x1conv_1'.format(prefix))(x)
     x =  keras.layers.DepthwiseConv2D(kernel_size=3, strides=strides, padding='same', name='{}/3x3dwconv'.format(prefix))(x)
-    x =  keras.layers.BatchNormalization(axis=bn_axis, name='{}/bn_3x3dwconv'.format(prefix))(x)
+    x =  keras.layers.BatchNormalization(axis=bn_axis, momentum=0.9,name='{}/bn_3x3dwconv'.format(prefix))(x)
     x =  keras.layers.Conv2D(bottleneck_channels, kernel_size=1,strides=1,padding='same',kernel_initializer='he_normal',  name='{}/1x1conv_2'.format(prefix))(x)
-    x =  keras.layers.BatchNormalization(axis=bn_axis, name='{}/bn_1x1conv_2'.format(prefix))(x)
+    x =  keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, name='{}/bn_1x1conv_2'.format(prefix))(x)
     x =  keras.layers.Activation('relu', name='{}/relu_1x1conv_2'.format(prefix))(x)
     if strides < 2:
         ret =  keras.layers.Concatenate(axis=bn_axis, name='{}/concat_1'.format(prefix))([x, c_hat])
     else:
-        s2 =  keras.layers.DepthwiseConv2D(kernel_size=3, strides=2, padding='same', name='{}/3x3dwconv_2'.format(prefix))(inputs)
-        s2 =  keras.layers.BatchNormalization(axis=bn_axis, name='{}/bn_3x3dwconv_2'.format(prefix))(s2)
+        s2 =  keras.layers.DepthwiseConv2D(kernel_size=3, strides=2, padding='same', kernel_initializer='he_normal', name='{}/3x3dwconv_2'.format(prefix))(inputs)
+        s2 =  keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, name='{}/bn_3x3dwconv_2'.format(prefix))(s2)
         s2 = keras.layers.Conv2D(bottleneck_channels, kernel_size=1,strides=1,kernel_initializer='he_normal', padding='same', name='{}/1x1_conv_3'.format(prefix))(s2)
-        s2 =  keras.layers.BatchNormalization(axis=bn_axis, name='{}/bn_1x1conv_3'.format(prefix))(s2)
+        s2 =  keras.layers.BatchNormalization(axis=bn_axis, momentum=0.9,name='{}/bn_1x1conv_3'.format(prefix))(s2)
         s2 =  keras.layers.Activation('relu', name='{}/relu_1x1conv_3'.format(prefix))(s2)
         ret = keras.layers.Concatenate(axis=bn_axis, name='{}/concat_2'.format(prefix))([x, s2])
     ret =  keras.layers.Lambda(channel_shuffle, name='{}/channel_shuffle'.format(prefix))(ret)
@@ -126,8 +126,8 @@ def DenseShuffleV1(include_top=True,blocks=[2,2,2],input_shape=(160,160,3),num_s
     bn_axis = 3  if keras.backend.image_data_format() == 'channels_last' else 1
     img_input = keras.layers.Input(shape=input_shape, name=name + '/input')
     x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name=name + '/zeroPad1')(img_input)
-    x0 = keras.layers.Conv2D(64, 7, strides=2, use_bias=False,kernel_initializer='he_normal',  name=name + '/conv1/conv')(x)  # 80, 80, 64
-    x = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name + '/conv1/bn')(x0)
+    x0 = keras.layers.Conv2D(64, 7, strides=1, use_bias=False,kernel_initializer='he_normal',  name=name + '/conv1/conv')(x)  # 80, 80, 64
+    x = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5, name=name + '/conv1/bn')(x0)
     x = keras.layers.Activation('relu', name=name + '/conv1/relu')(x)
     x = keras.layers.ZeroPadding2D(padding=((1, 1), (1, 1)), name=name + '/zeroPad2')(x)  # 82, 82, 64
     x = keras.layers.MaxPooling2D(3, strides=2, name=name + '/pool1')(x)  # 40, 40, 64
@@ -144,7 +144,7 @@ def DenseShuffleV1(include_top=True,blocks=[2,2,2],input_shape=(160,160,3),num_s
     z1 = keras.layers.MaxPool2D(pool_size=(3, 3), strides=(2, 2), padding='same', name='maxpool1')(z1)  # 40, 40, 24
     z1 = block(z1, out_channels_in_stage, repeat=num_shuffle_units[0], bottleneck_ratio=bottleneck_ratio, stage=0 + 2)  # 20, 20, 232)
     z2 = keras.layers.concatenate([z1, x],name=name+'/concat1')
-    z2 = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name + '/concat1/bn')(z2)
+    z2 = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5, name=name + '/concat1/bn')(z2)
     if dropout_rate>0.0:
         z2 = keras.layers.Dropout(dropout_rate,name=name+'/concat1/bn/dropout')(z2)
     z2=keras.layers.Activation('relu',name=name+'/concat1/bn/relu')(z2)
@@ -154,7 +154,7 @@ def DenseShuffleV1(include_top=True,blocks=[2,2,2],input_shape=(160,160,3),num_s
     z4 = keras.layers.concatenate([z21, z3],name=name+'/concat2')  # 10, 10, 644
     if dropout_rate > 0.0:
         z4 = keras.layers.Dropout(dropout_rate,name=name + '/concat2/bn/dropout')(z4)
-    z4 = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name + '/concat2/bn')(z4)
+    z4 = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5, name=name + '/concat2/bn')(z4)
     z4 = keras.layers.Activation('relu', name=name + '/concat2/bn/relu')(z4)
 
     z41 = dense_block(z4, blocks[2], name=name + '/conv4',do_norm=False)
@@ -163,7 +163,7 @@ def DenseShuffleV1(include_top=True,blocks=[2,2,2],input_shape=(160,160,3),num_s
     z6 = keras.layers.concatenate([z5, z41],name=name+'/concat3')  # 5, 5, 1282
     if dropout_rate > 0.0:
         z6 = keras.layers.Dropout(dropout_rate,name=name+'/concat3/dropout')(z6)
-    z6 = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name + '/concat3/bn')(z6)
+    z6 = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5, name=name + '/concat3/bn')(z6)
     z6 = keras.layers.Activation('relu', name=name + '/concat3/bn/relu')(z6)
     if bottleneck_ratio < 2:
         k = 1024
@@ -190,8 +190,8 @@ def DenseShuffleV2(include_top=True,blocks=[2,2,2],input_shape=(160,160,3),num_s
     bn_axis = 3   if keras.backend.image_data_format() == 'channels_last' else 1
     img_input = keras.layers.Input(shape=input_shape, name=name + '/input')
     x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name=name + '/zeroPad1')(img_input)
-    x0 = keras.layers.Conv2D(64, 7, strides=2, use_bias=False,kernel_initializer='he_normal',  name=name + '/conv1/conv')(x)  # 80, 80, 64
-    x = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name + '/conv1/bn')(x0)
+    x0 = keras.layers.Conv2D(64, 7, strides=1, use_bias=False,kernel_initializer='he_normal',  name=name + '/conv1/conv')(x)  # 80, 80, 64
+    x = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5, name=name + '/conv1/bn')(x0)
     x = keras.layers.Activation('relu', name=name + '/conv1/relu')(x)
     x = keras.layers.ZeroPadding2D(padding=((1, 1), (1, 1)), name=name + '/zeroPad2')(x)  # 82, 82, 64
     x = keras.layers.MaxPooling2D(3, strides=2, name=name + '/pool1')(x)  # 40, 40, 64
@@ -210,7 +210,7 @@ def DenseShuffleV2(include_top=True,blocks=[2,2,2],input_shape=(160,160,3),num_s
     z2 = keras.layers.concatenate([z1, x],name=name+'/concat1')
     if dropout_rate > 0.0:
         z2 = keras.layers.Dropout(dropout_rate,name=name+'/concat1/dropout')(z2)
-    z2 = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name + '/concat1/bn')(z2)
+    z2 = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5, name=name + '/concat1/bn')(z2)
     z2 = keras.layers.Activation('relu', name=name + '/concat1/bn/relu')(z2)
 
     z21 = dense_block(z2, blocks[1], name=name + '/conv3',do_norm=False)  # 20, 20, 360
@@ -219,7 +219,7 @@ def DenseShuffleV2(include_top=True,blocks=[2,2,2],input_shape=(160,160,3),num_s
     z4 = keras.layers.concatenate([z21, z3],name=name+'/concat2')  # 10, 10, 644
     if dropout_rate > 0.0:
         z4 = keras.layers.Dropout(dropout_rate,name=name+'/concat2/dropout')(z4)
-    z4 = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name + '/concat2/bn')(z4)
+    z4 = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5, name=name + '/concat2/bn')(z4)
     z4 = keras.layers.Activation('relu', name=name + '/concat2/bn/relu')(z4)
     z41 = dense_block(z4, blocks[2], name=name + '/conv4',do_norm=False)
     z41 = transition_block(z41, 0.5, name=name + '/pool4')  # 5, 5, 354
@@ -227,7 +227,7 @@ def DenseShuffleV2(include_top=True,blocks=[2,2,2],input_shape=(160,160,3),num_s
     z6 = keras.layers.concatenate([z5, z41],name=name+'/concat3')  # 5, 5, 1282
     if dropout_rate > 0.0:
         z6 = keras.layers.Dropout(dropout_rate,name=name+'/concat3/dropout')(z6)
-    z6 = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name + '/concat3/bn')(z6)
+    z6 = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5, name=name + '/concat3/bn')(z6)
     z6 = keras.layers.Activation('relu', name=name + '/concat3/bn/relu')(z6)
     if bottleneck_ratio < 2:
         k = 1024
@@ -249,8 +249,8 @@ def DenseNet(include_top=True,blocks=[2,2,2,2],input_shape=(192,192,3),pooling='
     bn_axis = 3 if keras.backend.image_data_format() == 'channels_last' else 1
     img_input = keras.layers.Input(shape=input_shape, name=name+'/input')
     x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)),name=name+'/zeroPad1')(img_input)
-    x = keras.layers.Conv2D(64, 7, strides=2, use_bias=False, name=name+'/conv1/conv')(x)
-    x = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name+'/conv1/bn')(x)
+    x = keras.layers.Conv2D(64, 7, strides=1, use_bias=False, name=name+'/conv1/conv',kernel_initializer='Orthogonal')(x)
+    x = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5, name=name+'/conv1/bn')(x)
     x = keras.layers.Activation('relu', name=name+'/conv1/relu')(x)
     x = keras.layers.ZeroPadding2D(padding=((1, 1), (1, 1)),name=name+'/zeroPad2')(x)
     x = keras.layers.MaxPooling2D(3, strides=2, name=name+'/pool1')(x)
@@ -260,9 +260,9 @@ def DenseNet(include_top=True,blocks=[2,2,2,2],input_shape=(192,192,3),pooling='
     x = transition_block(x, 0.5, name=name+'/pool3')
     x = dense_block(x, blocks[2], name=name+'/conv4')
     x = transition_block(x, 0.5, name=name+'/pool4')
-    x = dense_block(x, blocks[3], name=name+'/conv5')
-    x = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name=name+'/bn')(x)
-    output = keras.layers.Activation('relu', name=name+'/relu')(x)
+    output = dense_block(x, blocks[3], name=name+'/conv5')
+    #x = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, epsilon=1.001e-5, name=name+'/bn')(x)
+    #output = keras.layers.Activation('relu', name=name+'/relu')(x)
     if pooling == 'avg':
         output = keras.layers.GlobalAveragePooling2D(name=name+'/avg_pool')(output)
     elif pooling == 'max':
@@ -298,9 +298,11 @@ def ShuffleNetV2(include_top=True,
     img_input = keras.layers.Input(shape=input_shape)
 
     # create shufflenet architecture
-    x = keras.layers.Conv2D(filters=out_channels_in_stage[0], kernel_size=(3, 3), padding='same', use_bias=False, strides=(2, 2),
-               activation='relu', name='conv1')(img_input)
-    x = keras.layers.MaxPool2D(pool_size=(3, 3), strides=(2, 2), padding='same', name='maxpool1')(x)
+    x = keras.layers.Conv2D(filters=out_channels_in_stage[0], kernel_size=(3, 3), padding='same', use_bias=False, strides=(1, 1),
+               activation=None, name='conv1', kernel_initializer='he_normal')(img_input)
+    x = keras.layers.BatchNormalization(axis=-1, momentum=0.9, epsilon=1e-5, name='bn1')(x)
+    x = keras.layers.Activation('relu', name='conv1_bn1_relu')(x)
+    #x = keras.layers.MaxPool2D(pool_size=(3, 3), strides=(1, 1), padding='same', name='maxpool1')(x)
 
     # create stages containing shufflenet units beginning at stage 2
     for stage in range(len(num_shuffle_units)):
@@ -311,7 +313,7 @@ def ShuffleNetV2(include_top=True,
         k = 1024
     else:
         k = 2048
-    x = keras.layers.Conv2D(k, kernel_size=1, padding='same', strides=1, name='1x1conv5_out', activation='relu')(x)
+    x = keras.layers.Conv2D(k, kernel_size=1, padding='same', strides=1, name='1x1conv5_out', activation='relu', kernel_initializer='he_normal')(x)
 
     if pooling == 'avg':
         x = keras.layers.GlobalAveragePooling2D(name='global_avg_pool')(x)
@@ -325,11 +327,13 @@ def ShuffleNetV2(include_top=True,
     return model
 
 if __name__ == "__main__":
+    # ShuffleNetV2,4,121,336
     blocks=[6,12,24]
     blocks = [2, 4, 8]
     num_shuffle_units = [2, 3, 2]
     shape=(224,224,3)
     name = '%s_%s%s%s' % (sum(blocks) * 2 + 4, num_shuffle_units[0], num_shuffle_units[1], num_shuffle_units[2])
-    model=DenseShuffleV1(blocks=blocks,input_shape=shape,num_shuffle_units=num_shuffle_units,scale_factor = 1.0,bottleneck_ratio = 1,pooling='max',name='rgb',classes=1108)
+    #model=DenseShuffleV1(blocks=blocks,input_shape=shape,num_shuffle_units=num_shuffle_units,scale_factor = 1.0,bottleneck_ratio = 1,pooling='max',name='rgb',classes=1108)
+    model=ShuffleNetV2(input_shape=(32,32,3),classes=100)
     model.summary()
-    keras.utils.plot_model(model, 'DenseShuffleV1_%s.png' %name, show_shapes=True)
+    #keras.utils.plot_model(model, 'DenseShuffleV1_%s.png' %name, show_shapes=True)
