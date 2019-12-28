@@ -93,7 +93,9 @@ def ShuffleNet(include_top=True,scale_factor=1.0, pooling='max',
 
     # create shufflenet architecture
     x = keras.layers.Conv2D(filters=out_channels_in_stage[0], kernel_size=(3, 3), padding='same',
-               use_bias=False, strides=(2, 2), activation="relu", name="conv1")(img_input)
+               use_bias=False, strides=(1, 1), activation=None, name="conv1",kernel_initializer='he_normal')(img_input)
+    x=keras.layers.BatchNormalization(axis=-1,momentum=0.9,epsilon=1e-5,name='bn1')(x)
+    x=keras.layers.Activation('relu',name='conv1_bn1_relu')(x)
     x = keras.layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='same', name="maxpool1")(x)
 
     # create stages containing shufflenet units beginning at stage 2
@@ -202,17 +204,17 @@ def _shuffle_unit(inputs, in_channels, out_channels, groups, bottleneck_ratio, s
     x = _group_conv(inputs, in_channels, out_channels=bottleneck_channels,
                     groups=(1 if stage == 2 and block == 1 else groups),
                     name='%s/1x1_gconv_1' % prefix)
-    x = keras.layers.BatchNormalization(axis=bn_axis, name='%s/bn_gconv_1' % prefix)(x)
+    x = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, name='%s/bn_gconv_1' % prefix)(x)
     x = keras.layers.Activation('relu', name='%s/relu_gconv_1' % prefix)(x)
 
     x = keras.layers.Lambda(channel_shuffle, arguments={'groups': groups}, name='%s/channel_shuffle' % prefix)(x)
     x = keras.layers.DepthwiseConv2D(kernel_size=(3, 3), padding="same", use_bias=False,
-                        strides=strides, name='%s/1x1_dwconv_1' % prefix)(x)
-    x = keras.layers.BatchNormalization(axis=bn_axis, name='%s/bn_dwconv_1' % prefix)(x)
+                        strides=strides,kernel_initializer='he_normal',name='%s/1x1_dwconv_1' % prefix)(x)
+    x = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, name='%s/bn_dwconv_1' % prefix)(x)
 
     x = _group_conv(x, bottleneck_channels, out_channels=out_channels if strides == 1 else out_channels - in_channels,
                     groups=groups, name='%s/1x1_gconv_2' % prefix)
-    x = keras.layers.BatchNormalization(axis=bn_axis, name='%s/bn_gconv_2' % prefix)(x)
+    x = keras.layers.BatchNormalization(axis=bn_axis,momentum=0.9, name='%s/bn_gconv_2' % prefix)(x)
 
     if strides < 2:
         ret = keras.layers.Add(name='%s/add' % prefix)([x, inputs])
@@ -258,7 +260,7 @@ def _group_conv(x, in_channels, out_channels, groups, kernel=1, stride=1, name='
     """
     if groups == 1:
         return keras.layers.Conv2D(filters=out_channels, kernel_size=kernel, padding='same',
-                      use_bias=False, strides=stride, name=name)(x)
+                      use_bias=False,kernel_initializer='he_normal', strides=stride, name=name)(x)
 
     # number of intput channels per group
     ig = in_channels // groups
@@ -270,7 +272,7 @@ def _group_conv(x, in_channels, out_channels, groups, kernel=1, stride=1, name='
         offset = i * ig
         group = keras.layers.Lambda(lambda z: z[:, :, :, offset: offset + ig], name='%s/g%d_slice' % (name, i))(x)
         group_list.append(keras.layers.Conv2D(int(0.5 + out_channels / groups), kernel_size=kernel, strides=stride,
-                                 use_bias=False, padding='same', name='%s_/g%d' % (name, i))(group))
+                                 use_bias=False, padding='same', name='%s_/g%d' % (name, i),kernel_initializer='he_normal')(group))
     return keras.layers.Concatenate(name='%s/concat' % name)(group_list)
 
 
@@ -302,5 +304,9 @@ def channel_shuffle(x, groups):
     x = K.reshape(x, [-1, height, width, groups, channels_per_group])
     x = K.permute_dimensions(x, (0, 1, 2, 4, 3))  # transpose
     x = K.reshape(x, [-1, height, width, in_channels])
-
     return x
+
+if __name__ == "__main__":
+    # ShuffleNet,1,027,324
+    model=ShuffleNet(input_shape=(32,32,3),classes=100)
+    model.summary()
