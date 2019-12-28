@@ -34,14 +34,20 @@ DarkNet53
 MnasNet
 SimpleNetV1
 SimpleNetV2
+VGG11
+VGG13
+VGG16
+VGG19
 ```
 ## cifar100 Results
 
 |network|params|val_acc|
-|:---:|:---:|:---:|
+|:---:|---:|:---:|
 |SimpleNetV1|18,113,508|0.7295|
 |SimpleNetV2|5,522,739|0.7305|
 |SqueezeNet|787,108|0.7068|
+|ShuffleNet|1,027,324|0.6708|
+|ShuffleNetV2|4,121,336|0.7205|
 
 # Reference
 * [keras-applications](https://github.com/keras-team/keras-applications)
