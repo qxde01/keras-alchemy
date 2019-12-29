@@ -23,7 +23,7 @@ from models.DualPathNetwork import  DPN92,DPN98,DPN107,DPN137
 from models.darknet53 import darknet
 from models.Mnasnet import MnasNet
 from models.SimpleNet import SimpleNetV1,SimpleNetV2
-from models.vgg import VGG11Small,VGG11,VGG13,VGG16,VGG19
+from models.vgg import VGG11Small,VGG11,VGG13,VGG16,VGG19,VGG19Small
 
 def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     if net=='MobileNet' :
@@ -117,6 +117,8 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=MnasNet(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='VGG11Small':
         base_model=VGG11Small(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='VGG19Small':
+        base_model=VGG19Small(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='VGG11':
         base_model=VGG11(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='VGG13':
