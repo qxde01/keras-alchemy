@@ -282,6 +282,57 @@ def VGG11(include_top=True,
     model = keras.models.Model(img_input, x, name='vgg11')
     return model
 
+
+def VGG19Small(include_top=True, input_shape=None, pooling='avg', classes=100,
+          **kwargs):
+    img_input = keras.layers.Input(shape=input_shape)
+
+    # Block 1
+    x=conv_bn(img_input, 64, kernel_size=3, stride=1, padding='same', name='block1_conv1')
+    x = conv_bn(x, 64, kernel_size=3, stride=1, padding='same', name='block1_conv2')
+    x = keras.layers.MaxPooling2D((2, 2), strides=(2, 2), name='block1_pool')(x)
+
+    # Block 2
+    x = conv_bn(x, 96, kernel_size=3, stride=1, padding='same', name='block2_conv1')
+    x = conv_bn(x, 96, kernel_size=3, stride=1, padding='same', name='block2_conv2')
+    x = keras.layers.MaxPooling2D((2, 2), strides=(2, 2), name='block2_pool')(x)
+
+    # Block 3
+    x = conv_bn(x, 144, kernel_size=3, stride=1, padding='same', name='block3_conv1')
+    x = conv_bn(x, 144, kernel_size=3, stride=1, padding='same', name='block3_conv2')
+    x = conv_bn(x, 144, kernel_size=3, stride=1, padding='same', name='block3_conv3')
+    x = conv_bn(x, 144, kernel_size=3, stride=1, padding='same', name='block3_conv4')
+    x = keras.layers.MaxPooling2D((2, 2), strides=(2, 2), name='block3_pool')(x)
+
+    # Block 4
+    x = conv_bn(x, 216, kernel_size=3, stride=1, padding='same', name='block4_conv1')
+    x = conv_bn(x, 216, kernel_size=3, stride=1, padding='same', name='block4_conv2')
+    x = conv_bn(x, 216, kernel_size=3, stride=1, padding='same', name='block4_conv3')
+    x = conv_bn(x, 216, kernel_size=3, stride=1, padding='same', name='block4_conv4')
+    x = keras.layers.MaxPooling2D((2, 2), strides=(2, 2), name='block4_pool')(x)
+
+    # Block 5
+    x = conv_bn(x, 216, kernel_size=3, stride=1, padding='same', name='block5_conv1')
+    x = conv_bn(x, 216, kernel_size=3, stride=1, padding='same', name='block5_conv2')
+    x = conv_bn(x, 216, kernel_size=3, stride=1, padding='same', name='block5_conv3')
+    x = conv_bn(x, 216, kernel_size=3, stride=1, padding='same', name='block5_conv4')
+    x = keras.layers.MaxPooling2D((2, 2), strides=(2, 2), name='block5_pool')(x)
+
+    if include_top:
+        # Classification block
+        x = keras.layers.Flatten(name='flatten')(x)
+        x = keras.layers.Dense(864, activation='relu', name='fc1')(x)
+        x = keras.layers.Dense(864, activation='relu', name='fc2')(x)
+        x = keras.layers.Dense(classes, activation='softmax', name='predictions')(x)
+    else:
+        if pooling == 'avg':
+            x = keras.layers.GlobalAveragePooling2D()(x)
+        elif pooling == 'max':
+            x = keras.layers.GlobalMaxPooling2D()(x)
+    # Create model.
+    model = keras.models.Model(img_input, x, name='vgg19')
+    return model
+
 def VGG11Small(include_top=True,
            input_shape=None,
           pooling='avg',
