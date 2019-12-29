@@ -122,7 +122,7 @@ def _make_divisible(v, divisor, min_value=None):
     return new_v
 
 #[96, 128, 160, 192, 224]
-def MobileNetV2(include_top=True,input_shape=(224, 224, 3), alpha=1.0,pooling=None,classes=1000):
+def MobileNetV2(include_top=True,input_shape=(224, 224, 3), alpha=1.0,pooling='avg',classes=1000):
     """Instantiates the MobileNetV2 architecture.
 
     # Arguments
@@ -181,8 +181,9 @@ def MobileNetV2(include_top=True,input_shape=(224, 224, 3), alpha=1.0,pooling=No
     channel_axis = 1 if keras.backend.image_data_format() == 'channels_first' else -1
     first_block_filters = _make_divisible(32 * alpha, 8)
     x = keras.layers.ZeroPadding2D(padding=correct_pad(img_input, 3), name='Conv1_pad')(img_input)
-    x = keras.layers.Conv2D(first_block_filters, kernel_size=3, strides=(2, 2), padding='valid',kernel_initializer='he_normal',kernel_regularizer=keras.regularizers.l2(1e-5),  use_bias=False,name='Conv1')(x)
-    x = keras.layers.BatchNormalization(axis=channel_axis,  epsilon=1e-3,  momentum=0.999, name='bn_Conv1')(x)
+    ## cifar100 strides :(2,2)=>(1,1)
+    x = keras.layers.Conv2D(first_block_filters, kernel_size=3, strides=(1, 1), padding='valid',kernel_initializer='he_normal', use_bias=False,name='Conv1')(x)
+    x = keras.layers.BatchNormalization(axis=channel_axis,  epsilon=1e-5,  momentum=0.9, name='bn_Conv1')(x)
     x = keras.layers.ReLU(6., name='Conv1_relu')(x)
 
     x = _inverted_res_block(x, filters=16, alpha=alpha, stride=1,  expansion=1, block_id=0)
@@ -216,8 +217,8 @@ def MobileNetV2(include_top=True,input_shape=(224, 224, 3), alpha=1.0,pooling=No
     else:
         last_block_filters = 1280
 
-    x = keras.layers.Conv2D(last_block_filters, kernel_size=1, use_bias=False,kernel_initializer='he_normal', kernel_regularizer=keras.regularizers.l2(0.00001),name='Conv_1')(x)
-    x = keras.layers.BatchNormalization(axis=channel_axis,  epsilon=1e-3,  momentum=0.999,   name='Conv_1_bn')(x)
+    x = keras.layers.Conv2D(last_block_filters, kernel_size=1, use_bias=False,kernel_initializer='he_normal',name='Conv_1')(x)
+    x = keras.layers.BatchNormalization(axis=channel_axis,  epsilon=1e-5,  momentum=0.9,   name='Conv_1_bn')(x)
     x = keras.layers.ReLU(6., name='out_relu')(x)
 
     if pooling == 'avg':
@@ -245,7 +246,7 @@ def _inverted_res_block(inputs, expansion, stride, alpha, filters, block_id):
 
     if block_id:
         # Expand
-        x = keras.layers.Conv2D(expansion * in_channels,kernel_size=1, padding='same',use_bias=False,activation=None,kernel_initializer='he_normal', kernel_regularizer=keras.regularizers.l2(0.00001), name=prefix + 'expand')(x)
+        x = keras.layers.Conv2D(expansion * in_channels,kernel_size=1, padding='same',use_bias=False,activation=None,kernel_initializer='he_normal', name=prefix + 'expand')(x)
         x = keras.layers.BatchNormalization(axis=channel_axis, epsilon=1e-3, momentum=0.999, name=prefix + 'expand_BN')(x)
         x = keras.layers.ReLU(6., name=prefix + 'expand_relu')(x)
     else:
@@ -254,13 +255,13 @@ def _inverted_res_block(inputs, expansion, stride, alpha, filters, block_id):
     # Depthwise
     if stride == 2:
         x = keras.layers.ZeroPadding2D(padding=correct_pad(x, 3),name=prefix + 'pad')(x)
-    x = keras.layers.DepthwiseConv2D(kernel_size=3,strides=stride,activation=None, use_bias=False, padding='same' if stride == 1 else 'valid',kernel_initializer='he_normal', kernel_regularizer=keras.regularizers.l2(0.00001), name=prefix + 'depthwise')(x)
+    x = keras.layers.DepthwiseConv2D(kernel_size=3,strides=stride,activation=None, use_bias=False, padding='same' if stride == 1 else 'valid',kernel_initializer='he_normal', name=prefix + 'depthwise')(x)
     x = keras.layers.BatchNormalization(axis=channel_axis, epsilon=1e-3,momentum=0.999,  name=prefix + 'depthwise_BN')(x)
 
     x = keras.layers.ReLU(6., name=prefix + 'depthwise_relu')(x)
 
     # Project
-    x = keras.layers.Conv2D(pointwise_filters, kernel_size=1, padding='same', use_bias=False,kernel_initializer='he_normal', kernel_regularizer=keras.regularizers.l2(0.00001),activation=None,name=prefix + 'project')(x)
+    x = keras.layers.Conv2D(pointwise_filters, kernel_size=1, padding='same', use_bias=False,kernel_initializer='he_normal', activation=None,name=prefix + 'project')(x)
     x = keras.layers.BatchNormalization(axis=channel_axis, epsilon=1e-3,momentum=0.999, name=prefix + 'project_BN')(x)
 
     if in_channels == pointwise_filters and stride == 1:
@@ -268,8 +269,9 @@ def _inverted_res_block(inputs, expansion, stride, alpha, filters, block_id):
     return x
 
 if __name__ == "__main__":
+    # 2,386,084
     import os
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-    model=MobileNetV2()
+    model=MobileNetV2(input_shape=(32,32,3),classes=100)
     model.summary()
-    keras.utils.plot_model(model, 'png/MobileNetV2-1.0.png', show_shapes=True)
+    keras.utils.plot_model(model, 'MobileNetV2-1.0.png', show_shapes=True)
