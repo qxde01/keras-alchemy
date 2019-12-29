@@ -38,6 +38,7 @@ VGG11
 VGG13
 VGG16
 VGG19
+VGG19Small
 ```
 ## cifar100 Results
 
@@ -48,6 +49,9 @@ VGG19
 |SqueezeNet|787,108|0.7068|
 |ShuffleNet|1,027,324|0.6708|
 |ShuffleNetV2|4,121,336|0.7205|
+|VGG11|28,523,748|0.6621|
+|VGG11Small|2,932,996|0.6330|
+|VGG19Small|5,114,852|0.6578|
 
 # Reference
 * [keras-applications](https://github.com/keras-team/keras-applications)
