@@ -62,7 +62,7 @@ else:
 
 # [128, 160, 192, 224]:
 def MobileNet(input_shape=(224,224,3),alpha=1.0, depth_multiplier=1,
-              dropout=1e-3, classes=1000,include_top=True):
+              dropout=1e-3, classes=1000,include_top=True,pooling='avg'):
     """Instantiates the MobileNet architecture.
 
     # Arguments
@@ -87,9 +87,6 @@ def MobileNet(input_shape=(224,224,3),alpha=1.0, depth_multiplier=1,
         dropout: dropout rate
         include_top: whether to include the fully-connected
             layer at the top of the network.
-        weights: one of `None` (random initialization),
-              'imagenet' (pre-training on ImageNet),
-              or the path to the weights file to be loaded.
         input_tensor: optional Keras tensor (i.e. output of
             `layers.Input()`)
             to use as image input for the model.
@@ -123,11 +120,11 @@ def MobileNet(input_shape=(224,224,3),alpha=1.0, depth_multiplier=1,
                              '`0.25`, `0.50`, `0.75` or `1.0` only.')
 
     img_input = keras.layers.Input(shape=input_shape)
-
-    x = _conv_block(img_input, 32, alpha, strides=(2, 2))
+    # cifar100 strides=(2, 2)=>(1,1)
+    x = _conv_block(img_input, 32, alpha, strides=(1, 1))
     x = _depthwise_conv_block(x, 64, alpha, depth_multiplier, block_id=1)
 
-    x = _depthwise_conv_block(x, 128, alpha, depth_multiplier,strides=(2, 2), block_id=2)
+    x = _depthwise_conv_block(x, 128, alpha, depth_multiplier,strides=(1, 1), block_id=2) #strides=(2, 2)=>(1,1)
     x = _depthwise_conv_block(x, 128, alpha, depth_multiplier, block_id=3)
 
     x = _depthwise_conv_block(x, 256, alpha, depth_multiplier, strides=(2, 2), block_id=4)
@@ -143,20 +140,25 @@ def MobileNet(input_shape=(224,224,3),alpha=1.0, depth_multiplier=1,
     x = _depthwise_conv_block(x, 1024, alpha, depth_multiplier,  strides=(2, 2), block_id=12)
     x = _depthwise_conv_block(x, 1024, alpha, depth_multiplier, block_id=13)
 
-    if keras.backend.image_data_format() == 'channels_first':
-        shape = (int(1024 * alpha), 1, 1)
-    else:
-        shape = (1, 1, int(1024 * alpha))
-
-    x = keras.layers.GlobalAveragePooling2D()(x)
-    x = keras.layers.Reshape(shape, name='reshape_1')(x)
-    x = keras.layers.Dropout(dropout, name='dropout')(x)
-    x = keras.layers.Conv2D(classes, (1, 1), padding='same',kernel_regularizer=keras.regularizers.l2(1e-5), use_bias=False, name='conv_preds')(x)
-    if include_top:
-        x = keras.layers.Reshape((classes,), name='reshape_2')(x)
-        x = keras.layers.Activation('softmax', name='act_softmax')(x)
-    else:
+    #if keras.backend.image_data_format() == 'channels_first':
+    #    shape = (int(1024 * alpha), 1, 1)
+    #else:
+    #    shape = (1, 1, int(1024 * alpha))
+    if pooling=='avg':
         x = keras.layers.GlobalAveragePooling2D()(x)
+    else:
+        x=keras.layers.GlobalMaxPooling2D()(x)
+    if include_top:
+        x=keras.layers.Dense(classes,activation='softmax')(x)
+
+    # x = keras.layers.Reshape(shape, name='reshape_1')(x)
+    # x = keras.layers.Dropout(dropout, name='dropout')(x)
+    # x = keras.layers.Conv2D(classes, (1, 1), padding='same',kernel_regularizer=keras.regularizers.l2(1e-5), use_bias=False, name='conv_preds')(x)
+    # if include_top:
+    #     x = keras.layers.Reshape((classes,), name='reshape_2')(x)
+    #     x = keras.layers.Activation('softmax', name='act_softmax')(x)
+    # else:
+    #     x = keras.layers.GlobalAveragePooling2D()(x)
     #elif pooling == 'max':
     #    x = keras.layers.GlobalMaxPooling2D()(x)
 
@@ -291,8 +293,9 @@ def _depthwise_conv_block(inputs, pointwise_conv_filters, alpha,
     x = keras.layers.BatchNormalization(axis=channel_axis, name='conv_pw_%d_bn' % block_id)(x)
     return keras.layers.ReLU(6., name='conv_pw_%d_relu' % block_id)(x)
 if __name__ == "__main__":
+    #3,331,364
     import os
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-    model=MobileNet()
+    model=MobileNet(input_shape=(32,32,3),classes=100)
     model.summary()
-    keras.utils.plot_model(model, 'png/MobileNet-1.0.png', show_shapes=True)
+    keras.utils.plot_model(model, 'MobileNet-1.0.png', show_shapes=True)
