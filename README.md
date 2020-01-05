@@ -49,6 +49,7 @@ VGG19Small
 |SqueezeNet|787,108|0.7068|
 |ShuffleNet|1,027,324|0.6708|
 |ShuffleNetV2|4,121,336|0.7205|
+|MobileNet|3,331,364|0.7305|
 |MobileNetV2|2,386,084|0.6496|
 |MobileNetV3Small|3,073,916|0.6503|
 |VGG11|28,523,748|0.6621|
