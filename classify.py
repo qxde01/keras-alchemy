@@ -24,6 +24,7 @@ from models.darknet53 import darknet
 from models.Mnasnet import MnasNet
 from models.SimpleNet import SimpleNetV1,SimpleNetV2
 from models.vgg import VGG11Small,VGG11,VGG13,VGG16,VGG19,VGG19Small
+from models.efficientnet import EfficientNetB0,EfficientNetB1,EfficientNetB2,EfficientNetB3,EfficientNetB4,EfficientNetB5,EfficientNetB6,EfficientNetB7
 
 def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     if net=='MobileNet' :
@@ -127,6 +128,10 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=VGG16(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='VGG19':
         base_model=VGG19(include_top=True,input_shape=input_shape,classes=classes)   
+    elif net=='EfficientNetB0':
+        base_model=EfficientNetB0(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='EfficientNetB1':
+        base_model=EfficientNetB1(include_top=True,input_shape=input_shape,classes=classes)
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()
