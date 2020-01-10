@@ -16,10 +16,10 @@ MixNetSmall
 MixNetMedium
 MixNetLarge
 ResNet18
-ResNet18V2
 ResNet34
-ResNet34V2
 ResNet50
+ResNet101
+ResNet152
 ResNet50V2
 ResNeXt50
 DenseNet21
@@ -39,6 +39,7 @@ VGG13
 VGG16
 VGG19
 VGG19Small
+EfficientNetB0
 ```
 ## cifar100 Results
 
@@ -76,3 +77,4 @@ VGG19Small
 * [DarkNet53](https://github.com/xiaochus/YOLOv3)
 * [MnasNet](https://github.com/Shathe/MNasNet-Keras-Tensorflow)
 * [SimpleNet](https://github.com/Coderx7/SimpleNet)
+* [efficientnet](https://github.com/qubvel/efficientnet)
