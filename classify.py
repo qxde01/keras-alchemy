@@ -14,7 +14,7 @@ from models.mobilenet_v2 import MobileNetV2
 from models.nasnet import NASNetMobile,NASNetLarge
 from models.squeezenet import SqueezeNet
 from models.DenseShuffle import DenseNet,DenseShuffleV1,DenseShuffleV2,ShuffleNetV2
-from models.resnet import ResNet18,ResNet18V2,ResNet34,ResNet34V2,ResNet50,ResNet50V2,ResNeXt50
+from models.resnet import ResNet18,ResNet34,ResNet50,ResNet101,ResNet152,ResNet50V2,ResNet101V2,ResNet152V2,ResNeXt50,ResNeXt101
 from models.mobilenet_v3 import MobileNetV3Small,MobileNetV3Large
 from models.shufflenet import ShuffleNet
 from models.mixnets import MixNetSmall,MixNetLarge,MixNetMedium
@@ -37,16 +37,18 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=NASNetLarge(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='ResNet18':
         base_model=ResNet18(include_top=True,input_shape=input_shape,classes=classes)
-    elif net=='ResNet18V2':
-        base_model=ResNet18V2(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='ResNet34':
         base_model=ResNet34(include_top=True,input_shape=input_shape,classes=classes)
-    elif net=='ResNet34V2':
-        base_model=ResNet34V2(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='ResNet50':
         base_model=ResNet50(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='ResNet101':
+        base_model=ResNet101(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='ResNet152':
+        base_model=ResNet152(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='ResNet50V2':
         base_model=ResNet50V2(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='ResNeXt50':
+        base_model=ResNeXt50(include_top=True,input_shape=input_shape,classes=classes)
     elif net == 'DenseNet21':
         base_model = DenseNet(include_top=True, blocks=[2, 2, 2, 2], input_shape=input_shape,classes=classes,name='a')
     elif net=='DenseNet69':
@@ -110,12 +112,12 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=DPN137(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='DarkNet53':
         base_model=darknet(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='MnasNet':
+        base_model=MnasNet(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='SimpleNetV1':
         base_model=SimpleNetV1(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='SimpleNetV2':
         base_model=SimpleNetV2(include_top=True,input_shape=input_shape,classes=classes)
-    elif net=='MnasNet':
-        base_model=MnasNet(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='VGG11Small':
         base_model=VGG11Small(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='VGG19Small':
@@ -127,11 +129,17 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     elif net=='VGG16':
         base_model=VGG16(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='VGG19':
-        base_model=VGG19(include_top=True,input_shape=input_shape,classes=classes)   
+        base_model=VGG19(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='EfficientNetB0':
         base_model=EfficientNetB0(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='EfficientNetB1':
         base_model=EfficientNetB1(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='EfficientNetB2':
+        base_model=EfficientNetB2(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='EfficientNetB3':
+        base_model=EfficientNetB3(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='EfficientNetB4':
+        base_model=EfficientNetB4(include_top=True,input_shape=input_shape,classes=classes)
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()
