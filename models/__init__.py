@@ -2,9 +2,11 @@ from .mobilenet_v2 import MobileNetV2
 from .mobilenet import MobileNet
 from .DenseShuffle import DenseShuffleV2,DenseShuffleV1,DenseNet
 from .mobilenet_v3 import MobileNetV3Large,MobileNetV3Small
-from .resnet import ResNet18,ResNet34,ResNet18V2,ResNet34V2,ResNet50,ResNet50V2,ResNet101,ResNet101V2,ResNet152,ResNet152V2,ResNeXt50,ResNeXt101
+from .resnet import ResNet18,ResNet34,ResNet50,ResNet101,ResNet152,ResNet50V2,ResNet101V2,ResNet152V2,ResNeXt50,ResNeXt101
 from .squeezenet import SqueezeNet
 from .nasnet import NASNetMobile,NASNetLarge
 from .mixnets import MixNetMedium,MixNetLarge,MixNetSmall
 from .residual_attention_network import AttentionResNet56,AttentionResNet92
 from .DualPathNetwork import DPN92,DPN98,DPN107,DPN137
+from .vgg import VGG11Small,VGG11,VGG13,VGG16,VGG19,VGG19Small
+from .efficientnet import EfficientNetB0,EfficientNetB1,EfficientNetB2,EfficientNetB3,EfficientNetB4,EfficientNetB5,EfficientNetB6,EfficientNetB7
