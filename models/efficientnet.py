@@ -21,18 +21,19 @@
 # Code of this model implementation is mostly written by
 # Björn Barz ([@Callidior](https://github.com/Callidior))
 # https://github.com/qubvel/efficientnet
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import,division,print_function
+import tensorflow as tf
+if tf.__version__<'2.0':
+    import keras
+else:
+    from tensorflow import keras
 
 import math
 import string
 import collections
 #import numpy as np
-
 from six.moves import xrange
-import tensorflow as tf
-import keras
+
 
 BASE_WEIGHTS_PATH = (
     'https://github.com/Callidior/keras-applications/'
@@ -50,7 +51,7 @@ DEFAULT_BLOCKS_ARGS = [
     BlockArgs(kernel_size=3, num_repeat=1, input_filters=32, output_filters=16,
               expand_ratio=1, id_skip=True, strides=[1, 1], se_ratio=0.25),
     BlockArgs(kernel_size=3, num_repeat=2, input_filters=16, output_filters=24,
-              expand_ratio=6, id_skip=True, strides=[2, 2], se_ratio=0.25),
+              expand_ratio=6, id_skip=True, strides=[1, 1], se_ratio=0.25), #strides=[2, 2]->[1,1]
     BlockArgs(kernel_size=5, num_repeat=2, input_filters=24, output_filters=40,
               expand_ratio=6, id_skip=True, strides=[2, 2], se_ratio=0.25),
     BlockArgs(kernel_size=3, num_repeat=3, input_filters=40, output_filters=80,
