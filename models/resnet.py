@@ -28,6 +28,60 @@ if tf.__version__<'2.0':
 else:
     from tensorflow import keras
 
+def basic_block(x,
+    filters,
+    stage=0,
+    block=0,
+    kernel_size=3,
+    numerical_name=False,
+    stride=None
+):
+    """
+    A two-dimensional basic block.
+    :param filters: the output’s feature space
+    :param stage: int representing the stage of this block (starting from 0)
+    :param block: int representing this block (starting from 0)
+    :param kernel_size: size of the kernel
+    :param numerical_name: if true, uses numbers to represent blocks instead of chars (ResNet{101, 152, 200})
+    :param stride: int representing the stride used in the shortcut and the first conv layer, default derives stride from block id
+    """
+    if stride is None:
+        if block != 0 or stage == 0:
+            stride = 1
+        else:
+            stride = 2
+    axis = 3
+
+    if block > 0 and numerical_name:
+        block_char = "b{}".format(block)
+    else:
+        block_char = chr(ord('a') + block)
+
+    stage_char = str(stage + 2)
+    #print('stride:',stride)
+    y = keras.layers.ZeroPadding2D(padding=1, name="padding{}{}_branch2a".format(stage_char, block_char))(x)
+    y = keras.layers.Conv2D(filters, kernel_size, strides=stride,kernel_initializer='he_normal' ,use_bias=False, name="res{}{}_branch2a".format(stage_char, block_char))(y)
+    y = keras.layers.BatchNormalization(axis=axis, epsilon=1e-5, name="bn{}{}_branch2a".format(stage_char, block_char))(y)
+    y = keras.layers.Activation("relu", name="res{}{}_branch2a_relu".format(stage_char, block_char))(y)
+    y = keras.layers.ZeroPadding2D(padding=1, name="padding{}{}_branch2b".format(stage_char, block_char))(y)
+    y = keras.layers.Conv2D(filters, kernel_size, use_bias=False,kernel_initializer='he_normal' , name="res{}{}_branch2b".format(stage_char, block_char))(y)
+    y = keras.layers.BatchNormalization(axis=axis, epsilon=1e-5, name="bn{}{}_branch2b".format(stage_char, block_char))(y)
+    #print(block,y)
+
+    if block == 0 :
+        #print(block,stride,y)
+        shortcut = keras.layers.Conv2D(filters, (1, 1), strides=stride, use_bias=False, name="res{}{}_branch1".format(stage_char, block_char))(x)
+        shortcut = keras.layers.BatchNormalization(axis=axis, epsilon=1e-5,  name="bn{}{}_branch1".format(stage_char, block_char))(shortcut)
+    else:
+        shortcut = x
+    #print('shotcut:',shortcut)
+    y = keras.layers.Add(name="res{}{}".format(stage_char, block_char))([y, shortcut])
+    y = keras.layers.Activation("relu", name="res{}{}_relu".format(stage_char, block_char))(y)
+    return y
+
+
+
+
 def block1(x, filters, kernel_size=3, stride=1, conv_shortcut=True, name=None):
     """A residual block.
 
@@ -352,7 +406,7 @@ def ResNet50V2(include_top=True,
                pooling=None,
                classes=1000):
     def stack_fn(x):
-        x = stack2(x, 64, 3, name='conv2')
+        x = stack2(x, 64, 3,stride1=1, name='conv2')
         x = stack2(x, 128, 4, name='conv3')
         x = stack2(x, 256, 6, name='conv4')
         x = stack2(x, 512, 3, stride1=1, name='conv5')
@@ -366,7 +420,7 @@ def ResNet101V2(include_top=True,
                 pooling=None,
                 classes=1000):
     def stack_fn(x):
-        x = stack2(x, 64, 3, name='conv2')
+        x = stack2(x, 64, 3,stride1=1, name='conv2')
         x = stack2(x, 128, 4, name='conv3')
         x = stack2(x, 256, 23, name='conv4')
         x = stack2(x, 512, 3, stride1=1, name='conv5')
@@ -380,7 +434,7 @@ def ResNet152V2(include_top=True,
                 pooling=None,
                 classes=1000):
     def stack_fn(x):
-        x = stack2(x, 64, 3, name='conv2')
+        x = stack2(x, 64, 3,stride1=1, name='conv2')
         x = stack2(x, 128, 8, name='conv3')
         x = stack2(x, 256, 36, name='conv4')
         x = stack2(x, 512, 3, stride1=1, name='conv5')
@@ -413,57 +467,75 @@ def ResNeXt101(include_top=True,input_shape=None,pooling=None, classes=1000):
     return ResNet(stack_fn, False, False, 'resnext101',include_top, input_shape, pooling, classes)
 
 
-def ResNet18(include_top=True,input_shape=None,pooling=None, classes=1000):
-    def stack_fn(x):
-        x = stack1(x, 64, 2, stride1=1, name='conv2')
-        x = stack1(x, 128, 2, name='conv3')
-        x = stack1(x, 256, 2, name='conv4')
-        x = stack1(x, 512, 2, name='conv5')
-        return x
-    return ResNet(stack_fn, False, True, 'resnet18',include_top, input_shape,pooling, classes)
+def ResNet18(include_top=True,input_shape=None,pooling='avg', classes=1000):
+    img_input = keras.layers.Input(shape=input_shape)
+    x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='conv1_pad')(img_input)
+    x = keras.layers.Conv2D(64, 7, strides=1, use_bias=False, name='conv1_conv')(x)
 
-def ResNet34(include_top=True,input_shape=None,pooling=None, classes=1000):
-    def stack_fn(x):
-        x = stack1(x, 64, 3, stride1=1, name='conv2')
-        x = stack1(x, 128, 4, name='conv3')
-        x = stack1(x, 256, 6, name='conv4')
-        x = stack1(x, 512, 3, name='conv5')
-        return x
-    return ResNet(stack_fn, False, True, 'resnet34',include_top, input_shape,pooling, classes)
+    x=basic_block(x,64,block=0,kernel_size=3,stage=1)
+    x = basic_block(x, 64, block=1, kernel_size=3,stage=1)
 
-def ResNet18V2(include_top=True,
-               input_shape=None,
-               pooling=None,
-               classes=1000):
-    def stack_fn(x):
-        x = stack2(x, 64, 2, name='conv2')
-        x = stack2(x, 128, 2, name='conv3')
-        x = stack2(x, 256, 2, name='conv4')
-        x = stack2(x, 512, 2, stride1=1, name='conv5')
-        return x
-    return ResNet(stack_fn, True, True, 'resnet18v2',
-                  include_top, input_shape,pooling, classes)
+    x = basic_block(x, 128, block=0, kernel_size=3,stage=2)
+    x = basic_block(x, 128, block=1, kernel_size=3,stage=2)
 
-def ResNet34V2(include_top=True,
-               input_shape=None,
-               pooling=None,
-               classes=1000):
-    def stack_fn(x):
-        x = stack2(x, 64, 3, name='conv2')
-        x = stack2(x, 128, 4, name='conv3')
-        x = stack2(x, 256, 6, name='conv4')
-        x = stack2(x, 512, 3, stride1=1, name='conv5')
-        return x
-    return ResNet(stack_fn, True, True, 'resnet34v2',
-                  include_top, input_shape,pooling, classes)
+    x = basic_block(x, 256, block=0, kernel_size=3,stage=3)
+    x = basic_block(x, 256, block=1, kernel_size=3,stage=3)
+
+    x = basic_block(x, 512, block=0, kernel_size=3,stage=4)
+    x = basic_block(x, 512, block=1, kernel_size=3,stage=4)
+    if pooling == 'avg':
+        x = keras.layers.GlobalAveragePooling2D(name='avg_pool')(x)
+    elif pooling == 'max':
+        x = keras.layers.GlobalMaxPooling2D(name='max_pool')(x)
+    if include_top:
+        x=keras.layers.Dense(classes,activation='softmax',name='fc')(x)
+    model=keras.models.Model(img_input,x,name='ResNet18')
+    return model
+
+def ResNet34(include_top=True,input_shape=None,pooling='avg', classes=1000):
+    img_input = keras.layers.Input(shape=input_shape)
+    x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='conv1_pad')(img_input)
+    x = keras.layers.Conv2D(64, 7, strides=2, use_bias=False, name='conv1_conv')(x)
+    # blocks=3,4,6,3
+    x = basic_block(x, 64, block=0, kernel_size=3, stage=1)
+    x = basic_block(x, 64, block=1, kernel_size=3, stage=1)
+    x = basic_block(x, 64, block=2, kernel_size=3, stage=1)
+
+    x = basic_block(x, 128, block=0, kernel_size=3, stage=2)
+    x = basic_block(x, 128, block=1, kernel_size=3, stage=2)
+    x = basic_block(x, 128, block=2, kernel_size=3, stage=2)
+    x = basic_block(x, 128, block=3, kernel_size=3, stage=2)
+
+    x = basic_block(x, 256, block=0, kernel_size=3, stage=3)
+    x = basic_block(x, 256, block=1, kernel_size=3, stage=3)
+    x = basic_block(x, 256, block=2, kernel_size=3, stage=3,stride=2)
+    x = basic_block(x, 256, block=3, kernel_size=3, stage=3,stride=2)
+    x = basic_block(x, 256, block=4, kernel_size=3, stage=3,stride=2)
+    x = basic_block(x, 256, block=5, kernel_size=3, stage=3,stride=2)
+
+    x = basic_block(x, 512, block=0, kernel_size=3, stage=4,stride=1)
+    x = basic_block(x, 512, block=1, kernel_size=3, stage=4,stride=2)
+    x = basic_block(x, 512, block=2, kernel_size=3, stage=4,stride=2)
+
+    if pooling == 'avg':
+        x = keras.layers.GlobalAveragePooling2D(name='avg_pool')(x)
+    elif pooling == 'max':
+        x = keras.layers.GlobalMaxPooling2D(name='max_pool')(x)
+    if include_top:
+        x = keras.layers.Dense(classes, activation='softmax', name='fc')(x)
+    model = keras.models.Model(img_input, x, name='ResNet18')
+
+    return model
+
+
 
 setattr(ResNet18, '__doc__', ResNet.__doc__)
 setattr(ResNet34, '__doc__', ResNet.__doc__)
 setattr(ResNet50, '__doc__', ResNet.__doc__)
 setattr(ResNet101, '__doc__', ResNet.__doc__)
 setattr(ResNet152, '__doc__', ResNet.__doc__)
-setattr(ResNet18V2, '__doc__', ResNet.__doc__)
-setattr(ResNet34V2, '__doc__', ResNet.__doc__)
+#setattr(ResNet18V2, '__doc__', ResNet.__doc__)
+#setattr(ResNet34V2, '__doc__', ResNet.__doc__)
 setattr(ResNet50V2, '__doc__', ResNet.__doc__)
 setattr(ResNet101V2, '__doc__', ResNet.__doc__)
 setattr(ResNet152V2, '__doc__', ResNet.__doc__)
@@ -471,8 +543,11 @@ setattr(ResNeXt50, '__doc__', ResNet.__doc__)
 setattr(ResNeXt101, '__doc__', ResNet.__doc__)
 
 if __name__ == "__main__":
+    #ResNet18 11,241,508
+    #ResNet34 ,21,357,092
+    #ResNet50.,23,792,612
     import os
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-    model=ResNet18V2(include_top=True,input_shape=(32,32,3),pooling=None, classes=100)
+    model=ResNet34(include_top=True,input_shape=(32,32,3),pooling='avg', classes=100)
     model.summary()
-    keras.utils.plot_model(model, 'ResNet18V2.png', show_shapes=True)
+    #keras.utils.plot_model(model, 'ResNet34.png', show_shapes=True)
