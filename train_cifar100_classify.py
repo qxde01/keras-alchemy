@@ -43,7 +43,7 @@ def get_args():
     parser.add_argument('--pretrained',"-p",type=str,default=None,help=' softmax model weights  h5 file')
     parser.add_argument("--learning_rate",'-lr', type=float,default=0.01, help="learning_rate")
     parser.add_argument("--min_lr", '-min_lr', type=float, default=0.0005, help="min learning_rate")
-    parser.add_argument("--warmup", '-wp', type=int, default=0, help="warmup ")
+    parser.add_argument("--warmup", '-wp', type=int, default=1, help="warmup ")
     parser.add_argument("--lr_scheduler",'-lrs', type=int,default=2,help="1-stage decay,2-CosineAnnealingScheduler")
     parser.add_argument("--optimizers", '-optimizers', type=str, default='sgd', help="optimizers:SGD,Adam,Radam")
     args = parser.parse_args()
