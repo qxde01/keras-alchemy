@@ -495,7 +495,7 @@ def ResNet18(include_top=True,input_shape=None,pooling='avg', classes=1000):
 def ResNet34(include_top=True,input_shape=None,pooling='avg', classes=1000):
     img_input = keras.layers.Input(shape=input_shape)
     x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='conv1_pad')(img_input)
-    x = keras.layers.Conv2D(64, 7, strides=2, use_bias=False, name='conv1_conv')(x)
+    x = keras.layers.Conv2D(64, 7, strides=1, use_bias=False, name='conv1_conv')(x)
     # blocks=3,4,6,3
     print('block1')
     x = basic_block(x, 64, block=1, kernel_size=3, stage=1)
