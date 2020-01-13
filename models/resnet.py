@@ -338,7 +338,7 @@ def ResNet(stack_fn,
     bn_axis = 3 if keras.backend.image_data_format() == 'channels_last' else 1
 
     x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='conv1_pad')(img_input)
-    x = keras.layers.Conv2D(64, 7, strides=2, use_bias=use_bias, name='conv1_conv')(x)
+    x = keras.layers.Conv2D(64, 7, strides=1, use_bias=use_bias, name='conv1_conv')(x)
 
     if preact is False:
         x = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5,name='conv1_bn')(x)
