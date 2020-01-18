@@ -60,6 +60,7 @@ EfficientNetB0
 |VGG19Small|5,114,852|0.6578|
 |ResNet18|11,237,156|0.7563|
 |ResNet34|21,352,740|0.7785|
+|ResNet50V2|23,769,700|0.7593|
 
 # Reference
 * [keras-applications](https://github.com/keras-team/keras-applications)
