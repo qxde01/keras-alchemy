@@ -6,6 +6,8 @@ if tf.__version__<'2.0':
 else:
     from tensorflow import keras
 
+from .Capsule import Capsule
+
 #https://github.com/opconty/keras-shufflenetV2/blob/master/shufflenetv2.py
 def dense_block(x, blocks, name,do_norm=True):
     """A dense block.
@@ -204,7 +206,7 @@ def DenseShuffleV2(include_top=True,blocks=[2,2,2],input_shape=(160,160,3),num_s
     out_channels_in_stage *= scale_factor  # 24., 116., 232., 464
     out_channels_in_stage = out_channels_in_stage.astype(int)
     #print(out_channels_in_stage)
-    z1 = keras.layers.Conv2D(filters=out_channels_in_stage[0], kernel_size=(3, 3), padding='same', use_bias=False, strides=(2, 2),kernel_initializer='he_normal',  activation='relu', name='conv1')(img_input)  # 80, 80, 24
+    z1 = keras.layers.Conv2D(filters=out_channels_in_stage[0], kernel_size=(3, 3), padding='same', use_bias=False, strides=(1, 1),kernel_initializer='he_normal',  activation='relu', name='conv1')(img_input)  # 80, 80, 24
     z1 = keras.layers.MaxPool2D(pool_size=(3, 3), strides=(2, 2), padding='same', name='maxpool1')(z1)  # 40, 40, 24
     z1 = block(z1, out_channels_in_stage, repeat=num_shuffle_units[0], bottleneck_ratio=bottleneck_ratio, stage=0 + 2)  # 20, 20, 232)
     z2 = keras.layers.concatenate([z1, x],name=name+'/concat1')
@@ -326,14 +328,73 @@ def ShuffleNetV2(include_top=True,
     model = keras.models.Model(img_input,x, name=name)
     return model
 
+def ShuffleNetV2Capsule(include_top=True,
+                 scale_factor=1.0,
+                 pooling='max',
+                 input_shape=(224,224,3),
+                 num_shuffle_units=[3,7,3],
+                 bottleneck_ratio=1,
+                 classes=1000):
+
+    name = 'ShuffleNetV2_{}_{}_{}'.format(scale_factor, bottleneck_ratio, "".join([str(x) for x in num_shuffle_units]))
+    out_dim_stage_two = {0.5:48, 1:116, 1.5:176, 2:244}
+
+    if pooling not in ['max', 'avg']:
+        raise ValueError('Invalid value for pooling')
+    if not (float(scale_factor)*4).is_integer():
+        raise ValueError('Invalid value for scale_factor, should be x over 4')
+    exp = np.insert(np.arange(len(num_shuffle_units), dtype=np.float32), 0, 0)  # [0., 0., 1., 2.]
+    out_channels_in_stage = 2**exp
+    out_channels_in_stage *= out_dim_stage_two[bottleneck_ratio]  #  calculate output channels for each stage
+    out_channels_in_stage[0] = 24  # first stage has always 24 output channels
+    out_channels_in_stage *= scale_factor
+    out_channels_in_stage = out_channels_in_stage.astype(int)
+
+    img_input = keras.layers.Input(shape=input_shape)
+
+    # create shufflenet architecture
+    x = keras.layers.Conv2D(filters=out_channels_in_stage[0], kernel_size=(3, 3), padding='same', use_bias=False, strides=(1, 1),
+               activation=None, name='conv1', kernel_initializer='he_normal')(img_input)
+    x = keras.layers.BatchNormalization(axis=-1, momentum=0.9, epsilon=1e-5, name='bn1')(x)
+    x = keras.layers.Activation('relu', name='conv1_bn1_relu')(x)
+    #x = keras.layers.MaxPool2D(pool_size=(3, 3), strides=(1, 1), padding='same', name='maxpool1')(x)
+
+    # create stages containing shufflenet units beginning at stage 2
+    for stage in range(len(num_shuffle_units)):
+        repeat = num_shuffle_units[stage]
+        x = block(x, out_channels_in_stage, repeat=repeat,bottleneck_ratio=bottleneck_ratio, stage=stage + 2)
+
+    #if bottleneck_ratio < 2:
+    #    k = 1024
+    #else:
+    #    k = 2048
+    # x = keras.layers.Conv2D(k, kernel_size=1, padding='same', strides=1, name='1x1conv5_out', activation='relu', kernel_initializer='he_normal')(x)
+
+    if pooling == 'avg':
+        x = keras.layers.GlobalAveragePooling2D(name='global_avg_pool')(x)
+    elif pooling == 'max':
+        x = keras.layers.GlobalMaxPooling2D(name='global_max_pool')(x)
+
+    x = keras.layers.Reshape((-1, int(x.get_shape()[-1]) ))(x)
+    if include_top :
+        x = Capsule(classes, 32, 5, True)(x)
+        x = keras.layers.Lambda(lambda x: keras.backend.sqrt(keras.backend.sum(keras.backend.square(x), 2)), output_shape=(classes,))(x)
+
+    model = keras.models.Model(img_input,x, name=name)
+    return model
+
+
 if __name__ == "__main__":
     # ShuffleNetV2,4,121,336
+    import os
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
     blocks=[6,12,24]
-    blocks = [2, 4, 8]
+    blocks = [2, 2, 2]
     num_shuffle_units = [2, 3, 2]
-    shape=(224,224,3)
+    shape=(32,32,3)
     name = '%s_%s%s%s' % (sum(blocks) * 2 + 4, num_shuffle_units[0], num_shuffle_units[1], num_shuffle_units[2])
-    #model=DenseShuffleV1(blocks=blocks,input_shape=shape,num_shuffle_units=num_shuffle_units,scale_factor = 1.0,bottleneck_ratio = 1,pooling='max',name='rgb',classes=1108)
-    model=ShuffleNetV2(input_shape=(32,32,3),classes=100)
+    #model=DenseShuffleV2(blocks=blocks,input_shape=shape,num_shuffle_units=num_shuffle_units,scale_factor = 1.0,bottleneck_ratio = 1,pooling='max',name='rgb',classes=1108)
+    #model=ShuffleNetV2(input_shape=(32,32,3),classes=100)
+    model=ShuffleNetV2Capsule(input_shape=(32,32,3),classes=100)
     model.summary()
-    #keras.utils.plot_model(model, 'DenseShuffleV1_%s.png' %name, show_shapes=True)
+    keras.utils.plot_model(model, 'ShuffleNetV2Capsule.png', show_shapes=True)
