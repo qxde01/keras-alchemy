@@ -3,7 +3,7 @@ if tf.__version__<'2.0':
     import keras
 else:
     from tensorflow import keras
-
+from .Capsule import Capsule
 sq1x1 = "squeeze1x1"
 exp1x1 = "expand1x1"
 exp3x3 = "expand3x3"
@@ -70,7 +70,48 @@ def SqueezeNet(include_top=True,input_shape=(224,224,3), pooling='avg',classes=1
     model = keras.models.Model(inputs=img_input, outputs=x, name='squeezenet')
     return model
 
+def SqueezeCapsule(include_top=True,input_shape=(224,224,3), pooling='avg',classes=100):
+    """Instantiates the SqueezeNet architecture.
+    """
+    img_input = keras.layers.Input(shape=input_shape)
+    x = keras.layers.Conv2D(96, (3, 3), strides=(1, 1), padding='same',  use_bias=True,kernel_initializer='he_normal',name='conv1')(img_input) #111, 111, 64
+    x=keras.layers.BatchNormalization(axis=-1,momentum=0.95,epsilon=1e-5,name='conv1_bn')(x)
+    x = keras.layers.Activation('relu', name='relu_conv1')(x)
+    x = keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), name='pool1')(x) #55, 55, 64
+
+    f2 = fire_module(x, fire_id=2, squeeze=16, expand=128) #55, 55, 128
+    f30 = fire_module(f2, fire_id=3, squeeze=16, expand=128) #55, 55, 128
+    f3= keras.layers.add([f2,f30],name='fire2_3')
+    f4= fire_module(f3, fire_id=4, squeeze=32, expand=256)  # 27, 27, 256
+    f4 = keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(1, 1), name='pool3')(f4) #27, 27, 128
+
+    f50 = fire_module(f4, fire_id=5, squeeze=32, expand=256)  # 27, 27, 256
+    f5 = keras.layers.add([f50, f4], name='fire4_5')
+    f6=fire_module(f5, fire_id=6, squeeze=48, expand=384)
+
+    f70 = fire_module(f6, fire_id=7, squeeze=48, expand=384)
+    f7 = keras.layers.add([f70,f6] ,name='fire5_6')   # 13, 13, 384
+    f8 = fire_module(f7, fire_id=8, squeeze=64, expand=512)  # 13, 13, 512
+
+    f8 = keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), name='pool8')(f8)
+    #x = fire_module(x, fire_id=8, squeeze=64, expand=256) #13, 13, 512
+    x = fire_module(f8, fire_id=9, squeeze=64, expand=512) #13, 13, 512
+
+    if pooling == 'avg':
+        x = keras.layers.GlobalAveragePooling2D()(x)
+    if pooling == 'max':
+        x = keras.layers.GlobalMaxPooling2D()(x)
+
+    x = keras.layers.Reshape((-1, x.get_shape()[-1] ))(x)
+    if include_top :
+        x = Capsule(classes, 64, 5, True)(x)
+        x = keras.layers.Lambda(lambda x: keras.backend.sqrt(keras.backend.sum(keras.backend.square(x), 2)), output_shape=(classes,))(x)
+    model = keras.models.Model(inputs=img_input, outputs=x, name='SqueezeCapsele')
+    return model
+
+def Loss(y_true,y_pred):
+    return y_true*keras.backend.relu(0.9-y_pred)**2 + 0.25*(1-y_true)*keras.backend.relu(y_pred-0.1)**2
 if __name__ == "__main__":
-    model=SqueezeNet()
+    model=SqueezeCapsule()
     model.summary()
-    keras.utils.plot_model(model, 'SqueezeNet.png', show_shapes=True)
+    keras.utils.plot_model(model, 'SqueezeCapsule.png', show_shapes=True)

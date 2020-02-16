@@ -12,7 +12,7 @@ else:
 from models.mobilenet import MobileNet
 from models.mobilenet_v2 import MobileNetV2
 from models.nasnet import NASNetMobile,NASNetLarge
-from models.squeezenet import SqueezeNet
+from models.squeezenet import SqueezeNet,SqueezeCapsule
 from models.DenseShuffle import DenseNet,DenseShuffleV1,DenseShuffleV2,ShuffleNetV2
 from models.resnet import ResNet18,ResNet34,ResNet50,ResNet101,ResNet152,ResNet50V2,ResNet101V2,ResNet152V2,ResNeXt50,ResNeXt101
 from models.mobilenet_v3 import MobileNetV3Small,MobileNetV3Large
@@ -25,7 +25,7 @@ from models.Mnasnet import MnasNet
 from models.SimpleNet import SimpleNetV1,SimpleNetV2
 from models.vgg import VGG11Small,VGG11,VGG13,VGG16,VGG19,VGG19Small
 from models.efficientnet import EfficientNetB0,EfficientNetB1,EfficientNetB2,EfficientNetB3,EfficientNetB4,EfficientNetB5,EfficientNetB6,EfficientNetB7
-
+from models.ResDense import ResDenseNet,ResDenseNetMedium,ResDenseNetSmall
 def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     if net=='MobileNet' :
         base_model=MobileNet(include_top=True,input_shape=input_shape,classes=classes)
@@ -140,6 +140,16 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=EfficientNetB3(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='EfficientNetB4':
         base_model=EfficientNetB4(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='ResDenseNet30':
+        base_model=ResDenseNetSmall(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='ResDenseNet53':
+        base_model=ResDenseNetMedium(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='ResDenseNet104':
+        base_model=ResDenseNet(blocks=[3,4,23,3],include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='ResDenseNet176':
+        base_model=ResDenseNet(blocks=[6,12,24,16],include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='SqueezeCapsule':
+        base_model=SqueezeCapsule(include_top=True,input_shape=input_shape,classes=classes)
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()
