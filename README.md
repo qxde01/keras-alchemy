@@ -40,6 +40,7 @@ VGG16
 VGG19
 VGG19Small
 EfficientNetB0
+ResDenseNet-30
 ```
 ## cifar100 Results
 
@@ -61,6 +62,10 @@ EfficientNetB0
 |ResNet18|11,237,156|0.7563|
 |ResNet34|21,352,740|0.7785|
 |ResNet50V2|23,769,700|0.7593|
+|ResDenseNet-30|1,524,724|0.7305|
+|ResDenseNet-53|2,976,004|0.7559|
+|ResDenseNet-104|7,407,972|0.7689|
+
 
 # Reference
 * [keras-applications](https://github.com/keras-team/keras-applications)
@@ -81,3 +86,4 @@ EfficientNetB0
 * [MnasNet](https://github.com/Shathe/MNasNet-Keras-Tensorflow)
 * [SimpleNet](https://github.com/Coderx7/SimpleNet)
 * [efficientnet](https://github.com/qubvel/efficientnet)
+* [Capsule](https://github.com/bojone/Capsule)
