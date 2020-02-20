@@ -49,6 +49,7 @@ ResDenseNet-30
 |SimpleNetV1|18,113,508|0.7295|
 |SimpleNetV2|5,522,739|0.7305|
 |SqueezeNet|787,108|0.7068|
+|SqueezeCapsule|2,374,208|0.7295|
 |ShuffleNet|1,027,324|0.6708|
 |ShuffleNetV2|4,121,336|0.7205|
 |MobileNet|3,331,364|0.7305|
