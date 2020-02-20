@@ -104,7 +104,7 @@ def SqueezeCapsule(include_top=True,input_shape=(224,224,3), pooling='avg',class
 
     x = keras.layers.Reshape((-1, int(x.get_shape()[-1]) ))(x)
     if include_top :
-        x = Capsule(classes, 64, 5, True)(x)
+        x = Capsule(classes, 32, 5, True)(x)
         x = keras.layers.Lambda(lambda x: keras.backend.sqrt(keras.backend.sum(keras.backend.square(x), 2)), output_shape=(classes,))(x)
     model = keras.models.Model(inputs=img_input, outputs=x, name='SqueezeCapsele')
     return model
