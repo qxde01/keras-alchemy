@@ -11,8 +11,8 @@ else:
     os.environ['TF_KERAS'] = '1'
 from keras_radam import RAdam
 from siamese import build_model,contrastive_loss,covert2cassify
-from data_generator import DataGenerator,create_pairs,preprocess_input
-from data_generator import DataGenerator_classify,smooth_labels
+from utils import DataGenerator,create_pairs,preprocess_input
+from utils import DataGenerator_classify,smooth_labels
 from warmup import LRTensorBoard,WarmUpLearningRateScheduler,CosineAnnealingScheduler,CyclicLR
 
 global init_lr
