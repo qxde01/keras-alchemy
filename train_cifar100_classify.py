@@ -12,7 +12,7 @@ else:
 from keras_radam import RAdam
 from keras_lookahead import Lookahead
 from classify import build_model
-from data_generator import DataGenerator_classify,smooth_labels,preprocess_input
+from utils import DataGenerator_classify,smooth_labels,preprocess_input
 from warmup import LRTensorBoard,WarmUpLearningRateScheduler,CosineAnnealingScheduler,CyclicLR
 
 if os.path.exists('saved')==False:
