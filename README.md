@@ -48,10 +48,12 @@ ResDenseNet-30
 |:---:|---:|:---:|
 |SimpleNetV1|18,113,508|0.7295|
 |SimpleNetV2|5,522,739|0.7305|
+|SimpleNetV2Capsule|6,861,839|0.7583|
 |SqueezeNet|787,108|0.7068|
 |SqueezeCapsule|2,374,208|0.7295|
 |ShuffleNet|1,027,324|0.6708|
 |ShuffleNetV2|4,121,336|0.7205|
+|ShuffleNetV2Capsule|7,295,636|0.7125|
 |MobileNet|3,331,364|0.7305|
 |MobileNetV2|2,386,084|0.6496|
 |MobileNetV3Small|3,073,916|0.6503|
@@ -64,6 +66,7 @@ ResDenseNet-30
 |ResNet34|21,352,740|0.7785|
 |ResNet50V2|23,769,700|0.7593|
 |ResDenseNet-30|1,524,724|0.7305|
+|ResDenseNet-30-Capsule|3,719,424|0.7402|
 |ResDenseNet-53|2,976,004|0.7559|
 |ResDenseNet-104|7,407,972|0.7689|
 
