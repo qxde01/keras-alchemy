@@ -13,7 +13,7 @@ from models.mobilenet import MobileNet
 from models.mobilenet_v2 import MobileNetV2
 from models.nasnet import NASNetMobile,NASNetLarge
 from models.squeezenet import SqueezeNet,SqueezeCapsule
-from models.DenseShuffle import DenseNet,DenseShuffleV1,DenseShuffleV2,ShuffleNetV2
+from models.DenseShuffle import DenseNet,DenseShuffleV1,DenseShuffleV2,ShuffleNetV2,ShuffleNetV2Capsule
 from models.resnet import ResNet18,ResNet34,ResNet50,ResNet101,ResNet152,ResNet50V2,ResNet101V2,ResNet152V2,ResNeXt50,ResNeXt101
 from models.mobilenet_v3 import MobileNetV3Small,MobileNetV3Large
 from models.shufflenet import ShuffleNet
@@ -51,6 +51,8 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=ResNeXt50(include_top=True,input_shape=input_shape,classes=classes)
     elif net == 'DenseNet21':
         base_model = DenseNet(include_top=True, blocks=[2, 2, 2, 2], input_shape=input_shape,classes=classes,name='a')
+    elif net == 'DenseNet21Capsule':
+        base_model = DenseNet(include_top=True, blocks=[2, 2, 2, 2], input_shape=input_shape,classes=classes,pooling='avg',name='a',capsule=True)
     elif net=='DenseNet69':
         base_model = DenseNet(include_top=True,blocks=[6,8,10,8],input_shape=input_shape,classes=classes)
     elif net=='DenseNet109':
@@ -117,7 +119,9 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     elif net=='SimpleNetV1':
         base_model=SimpleNetV1(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='SimpleNetV2':
-        base_model=SimpleNetV2(include_top=True,input_shape=input_shape,classes=classes)
+        base_model=SimpleNetV2(include_top=True,input_shape=input_shape,classes=classes,pooling='max')
+    elif net=='SimpleNetV2Capsule':
+        base_model=SimpleNetV2(include_top=True,input_shape=input_shape,classes=classes,capsule=True)
     elif net=='VGG11Small':
         base_model=VGG11Small(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='VGG19Small':
@@ -142,6 +146,9 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=EfficientNetB4(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='ResDenseNet30':
         base_model=ResDenseNetSmall(include_top=True,input_shape=input_shape,classes=classes)
+    elif net=='ResDenseNet30Capsule':
+        #3,719,424
+        base_model=ResDenseNet(blocks=[2,2,2,2],include_top=True,input_shape=input_shape,classes=classes,capsule=True)
     elif net=='ResDenseNet53':
         base_model=ResDenseNetMedium(include_top=True,input_shape=input_shape,classes=classes)
     elif net=='ResDenseNet104':
@@ -150,6 +157,8 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=ResDenseNet(blocks=[6,12,24,16],include_top=True,input_shape=input_shape,classes=classes)
     elif net=='SqueezeCapsule':
         base_model=SqueezeCapsule(include_top=True,input_shape=input_shape,classes=classes)
+    elif net == 'ShuffleNetV2Capsule':
+        base_model = ShuffleNetV2Capsule(include_top=True, input_shape=input_shape, classes=classes)
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()
