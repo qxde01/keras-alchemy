@@ -3,6 +3,7 @@ if tf.__version__<'2.0':
     import keras
 else:
     from tensorflow import keras
+from .Capsule import Capsule
 
 # https://github.com/Coderx7/SimpleNet
 def SimpleNetV1(include_top=True,input_shape=(224,224,3),pooling='max',classes=100,dropout_rate=0.1):
@@ -106,7 +107,7 @@ def SimpleNetV1(include_top=True,input_shape=(224,224,3),pooling='max',classes=1
     model=keras.models.Model(inputs=img_input,outputs=output,name='SimpleNetV1')
     return model
 #4,857,267
-def SimpleNetV2(include_top=True,input_shape=(224,224,3),pooling='max',classes=100,dropout_rate=0.2):
+def SimpleNetV2(include_top=True,input_shape=(224,224,3),pooling='avg',classes=100,dropout_rate=0.0,capsule=False):
     img_input = keras.layers.Input(shape=input_shape, name= 'input')
     conv1=keras.layers.Conv2D(66,kernel_size=3,strides=(1,1),padding='same',name='conv1',kernel_initializer='he_normal')(img_input)
     conv1=keras.layers.BatchNormalization(axis=-1,momentum=0.95,epsilon=1e-5,name='conv1_bn')(conv1)
@@ -202,7 +203,12 @@ def SimpleNetV2(include_top=True,input_shape=(224,224,3),pooling='max',classes=1
     if dropout_rate>0.0:
         output = keras.layers.Dropout(rate=dropout_rate, name='global_dropout')(output)
     if include_top:
-        output=keras.layers.Dense(classes,activation='softmax')(output)
+        if capsule :
+            output = keras.layers.Reshape((-1, int(output.get_shape()[-1])))(output)
+            output = Capsule(classes, 32, 3, True)(output)
+            output = keras.layers.Lambda(lambda x: keras.backend.sqrt(keras.backend.sum(keras.backend.square(x), 2)), output_shape=(classes,))(output)
+        else:
+            output=keras.layers.Dense(classes,activation='softmax')(output)
     model=keras.models.Model(inputs=img_input,outputs=output,name='SimpleNetV2')
     return model
 
