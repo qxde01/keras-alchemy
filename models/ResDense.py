@@ -6,6 +6,8 @@ if tf.__version__<'2.0':
 else:
     from tensorflow import keras
 
+from .Capsule import Capsule
+
 def basic_block(x,
     filters,
     stage=0,
@@ -192,12 +194,14 @@ def ResDenseNet(blocks=[2,2,2,2],
            include_top=True,
            input_shape=(32,32,3),
            pooling='avg',
-           classes=1000):
+           classes=1000,capsule=False):
     img_input = keras.layers.Input(shape=input_shape)
     bn_axis = 3 #if keras.backend.image_data_format() == 'channels_last' else 1
-
+    s=1
+    if input_shape[0]>100:
+        s=2
     x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='conv1_pad')(img_input)
-    x = keras.layers.Conv2D(64, 7, strides=1, use_bias=False, name='conv1_conv')(x)
+    x = keras.layers.Conv2D(64, 7, strides=s, use_bias=False, name='conv1_conv')(x)
     x = keras.layers.BatchNormalization(axis=bn_axis, momentum=0.9, epsilon=1.001e-5, name= 'conv1/bn')(x)
     x = keras.layers.Activation('relu', name='conv1/bn1/relu')(x)
 
@@ -246,7 +250,13 @@ def ResDenseNet(blocks=[2,2,2,2],
     elif pooling == 'max':
         output = keras.layers.GlobalMaxPooling2D(name='max_pool')(output)
     if include_top:
-        output = keras.layers.Dense(classes, activation='softmax', name= 'FC')(output)
+        if capsule:
+            output = keras.layers.Reshape((-1, int(output.get_shape()[-1])))(output)
+            output = Capsule(classes, 32, 3, True)(output)
+            output = keras.layers.Lambda(lambda x: keras.backend.sqrt(keras.backend.sum(keras.backend.square(x), 2)),
+                                    output_shape=(classes,))(output)
+        else:
+            output = keras.layers.Dense(classes, activation='softmax', name= 'FC')(output)
     model = keras.models.Model(inputs=img_input, outputs=output,name=model_name)
     return model
 
@@ -281,6 +291,7 @@ if __name__ == "__main__":
     # blocks=[3,4,23,3]    7,407,972 104-Conv2d
     import os
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-    model=ResDenseNet(blocks=[2,2,2,2],include_top=True,input_shape=(32,32,3),pooling='avg', classes=100)
+    #model=ResDenseNet(blocks=[2,2,2,2],include_top=True,input_shape=(32,32,3),pooling='avg', classes=100)
+    model=ResDenseNet(blocks=[2,2,2,2],include_top=True,input_shape=(32,32,3),classes=100,capsule=True)
     model.summary()
-    keras.utils.plot_model(model, 'ResDenseL.png', show_shapes=True)
+    keras.utils.plot_model(model, 'ResDense30C.png', show_shapes=True)
