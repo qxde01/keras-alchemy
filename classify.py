@@ -26,6 +26,7 @@ from models.SimpleNet import SimpleNetV1,SimpleNetV2
 from models.vgg import VGG11Small,VGG11,VGG13,VGG16,VGG19,VGG19Small
 from models.efficientnet import EfficientNetB0,EfficientNetB1,EfficientNetB2,EfficientNetB3,EfficientNetB4,EfficientNetB5,EfficientNetB6,EfficientNetB7
 from models.ResDense import ResDenseNet,ResDenseNetMedium,ResDenseNetSmall
+from models.MultiResNet import MultiResNet
 def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
     if net=='MobileNet' :
         base_model=MobileNet(include_top=True,input_shape=input_shape,classes=classes)
@@ -159,6 +160,8 @@ def build_model(net='MobileNet',input_shape=(224,224,3),classes=100):
         base_model=SqueezeCapsule(include_top=True,input_shape=input_shape,classes=classes)
     elif net == 'ShuffleNetV2Capsule':
         base_model = ShuffleNetV2Capsule(include_top=True, input_shape=input_shape, classes=classes)
+    elif net=='MultiResNet':
+        base_model=MultiResNet(input_shape=input_shape, classes=classes)
     else:
         print('the network name you have entered is not supported yet')
         sys.exit()
