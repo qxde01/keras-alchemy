@@ -114,7 +114,7 @@ def ResPath(filters, length, inp):
 
 
 
-def MultiResNet(input_shape=(224, 224, 3), classes=1000,pooling='avg',filters=32):
+def MultiResNet(input_shape=(224, 224, 3), classes=1000,pooling='avg',filters=64):
 
     inputs = keras.layers.Input(shape=input_shape)
     mresblock1 = MultiResBlock(filters, inputs)  # 224X224X51
