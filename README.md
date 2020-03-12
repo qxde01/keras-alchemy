@@ -41,6 +41,7 @@ VGG19
 VGG19Small
 EfficientNetB0
 ResDenseNet-30
+MultiResNet
 ```
 ## cifar100 Results
 
@@ -91,3 +92,4 @@ ResDenseNet-30
 * [SimpleNet](https://github.com/Coderx7/SimpleNet)
 * [efficientnet](https://github.com/qubvel/efficientnet)
 * [Capsule](https://github.com/bojone/Capsule)
+* [MultiResUNet](https://github.com/nibtehaz/MultiResUNet)
