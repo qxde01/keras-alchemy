@@ -34,6 +34,13 @@ def conv2d_bn(x, filters, num_row, num_col, padding='same', strides=(1, 1), acti
         x = keras.layers.Activation(activation, name=name)(x)
         return x
 
+def sepconv2d_bn(x, filters, kernel_size=3, padding='same', activation='relu', name=None):
+    x = keras.layers.SeparableConv2D(filters, kernel_size=kernel_size, padding=padding, use_bias=False,
+                            kernel_initializer='he_normal',name=name+'_sepconv2d')(x)
+    x = keras.layers.BatchNormalization(axis=3, scale=True, momentum=0.95,name=name+'_sepconv2d_bn')(x)
+    if activation is not None:
+        x = keras.layers.Activation(activation, name=name+'_sepconv2d_bn_relu')(x)
+    return x
 
 def trans_conv2d_bn(x, filters, num_row, num_col, padding='same', strides=(2, 2), name=None):
     '''
@@ -114,10 +121,16 @@ def ResPath(filters, length, inp):
 
 
 
-def MultiResNet(input_shape=(224, 224, 3), classes=1000,pooling='avg',filters=64):
-
+def MultiResNet(input_shape=(224, 224, 3), classes=1000,pooling='avg',filters=32):
+    if input_shape[0]>112:
+        stride0=2
+    else:
+        stride0=1
     inputs = keras.layers.Input(shape=input_shape)
-    mresblock1 = MultiResBlock(filters, inputs)  # 224X224X51
+    x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='pad')(inputs)
+
+    x = keras.layers.Conv2D(64, 7, strides=stride0, use_bias=True, name='conv1')(x)
+    mresblock1 = MultiResBlock(filters, x)  # 224X224X51
     pool1 = keras.layers.MaxPooling2D(pool_size=(2, 2))(mresblock1)  # 112*112*51
 
     mresblock1 = ResPath(filters, 4, mresblock1)  # 224X224X32
@@ -141,14 +154,15 @@ def MultiResNet(input_shape=(224, 224, 3), classes=1000,pooling='avg',filters=64
     mresblock4 = ResPath(filters * 8, 1, mresblock4)  # 28, 28, 256
     mresblock4 = keras.layers.concatenate([mresblock3, mresblock4], name='concat_m34')  # 28, 28, 480
     mresblock4 = keras.layers.MaxPooling2D(pool_size=(2, 2))(mresblock4)  # 14, 14, 480
-
+    output=keras.layers.concatenate([pool4,mresblock4])
     #mresblock5 = MultiResBlock(filters * 16, pool4)  # 14, 14, 853
-    output=MultiResBlock(filters * 16, pool4)
+    output=MultiResBlock(filters * 16, output)
     #output = keras.layers.concatenate([mresblock4, mresblock5], name='concat_m45')
     if pooling=='avg':
         output = keras.layers.GlobalAveragePooling2D()(output)
     else:
         output=keras.layers.GlobalMaxPooling2D()(output)
+    #output=keras.layers.Dropout(0.5)(output)
     output = keras.layers.Dense(classes, activation='softmax')(output)
     model = keras.models.Model(inputs=inputs, outputs=output,name='MultiResUnet')
     return model
