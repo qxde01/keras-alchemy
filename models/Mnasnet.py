@@ -9,14 +9,19 @@ else:
 
 
 def MnasNet(include_top=True,input_shape=(224, 224, 3),classes=100, pooling='avg', alpha=1):
+	if input_shape[0]>112:
+		stride0=2
+	else:
+		stride0=1
+	
 	inputs = keras.layers.Input(shape=input_shape)
 
-	x = conv_bn(inputs, 32*alpha, 7,   strides=2)
+	x = conv_bn(inputs, 32*alpha, 7,   strides=stride0)
 	print(x)
 	x = sepConv_bn_noskip(x, 16*alpha, 3,  strides=1)
 	print(x)
 	# MBConv3 3x3
-	x = MBConv_idskip(x, filters=24, kernel_size=3,  strides=2, filters_multiplier=3, alpha=alpha)
+	x = MBConv_idskip(x, filters=24, kernel_size=3,  strides=stride0, filters_multiplier=3, alpha=alpha)
 	print(x)
 	x = MBConv_idskip(x, filters=24, kernel_size=3,  strides=1, filters_multiplier=3, alpha=alpha)
 	x = MBConv_idskip(x, filters=24, kernel_size=3,  strides=1, filters_multiplier=3, alpha=alpha)
