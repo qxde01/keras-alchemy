@@ -71,6 +71,7 @@ MultiResNet
 |ResDenseNet-53|2,976,004|0.7559|
 |ResDenseNet-104|7,407,972|0.7689|
 |MnasNet|3,217,900|0.7521|
+|MultiResNet|6,014,038|0.6921|
 
 
 # Reference
