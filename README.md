@@ -42,6 +42,7 @@ VGG19Small
 EfficientNetB0
 ResDenseNet-30
 MultiResNet
+BlazeFace
 ```
 ## cifar100 Results
 
@@ -72,6 +73,7 @@ MultiResNet
 |ResDenseNet-104|7,407,972|0.7689|
 |MnasNet|3,217,900|0.7521|
 |MultiResNet|6,014,038|0.6921|
+|BlazeFace|715,044|0.6236|
 
 
 # Reference
@@ -95,3 +97,4 @@ MultiResNet
 * [efficientnet](https://github.com/qubvel/efficientnet)
 * [Capsule](https://github.com/bojone/Capsule)
 * [MultiResUNet](https://github.com/nibtehaz/MultiResUNet)
+* [BlazeFace](https://github.com/vietanhdev/blazeface_keras)
